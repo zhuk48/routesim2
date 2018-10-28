@@ -16,6 +16,8 @@ class Sim(Topology):
         self.load_event(EVENT_PATH + event_file)
 
         print(self)
+        # TODO： 1. Use link_has_been_updated() to init each Node
+        # TODO:  2. Process Event
 
 
     def __str__(self):
@@ -33,7 +35,6 @@ class Sim(Topology):
         while e:
             e.dispatch()
             e = Event_Queue.Get_Earliest()
-
 
 
     def load_event(self, file):
@@ -90,4 +91,5 @@ def main():
 
 
 if __name__ == '__main__':
+    # Try: python sim.py GENERIC demo.topo demo.event
     main()
