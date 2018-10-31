@@ -66,6 +66,19 @@ class Topology:
             self.logging.warning("remove link (%d, %d) does not exit" % (node1, node2))
 
 
+    def delete_node(self, node):
+        if node in self.__g.nodes:
+            for neighbor in list(self.__g[node].keys()):
+                self.delete_link(node, neighbor)
+            self.__g.remove_node(node)
+            Topology.Nodes.pop(node)
+            self.logging.debug("node %d deleted at time %d" % (node, Get_Time()))
+        else:
+            self.logging.warning("remove node %d does not exit" % node)
+
+
+
+
     def load_command_file(self, file):
         try:
             f = open(file)

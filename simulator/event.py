@@ -37,5 +37,7 @@ class Event:
             self.sim.change_link(self.arg1, self.arg2, self. arg3)
         if self.event_type == EVENT_TYPE.DELETE_LINK:
             self.sim.delete_link(self.arg1, self.arg2)
+        if self.event_type == EVENT_TYPE.DELETE_NODE:
+            self.sim.delete_node(self.arg1)
 
 
