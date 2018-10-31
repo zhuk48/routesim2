@@ -113,5 +113,8 @@ G.remove_node(2)
 
 for (u, v, wt) in FG.edges.data('weight'):
 ...     if wt < 0.5: print('(%d, %d, %.3f)' % (u, v, wt))
+
+
+child_method = getattr(self, 'out')
 """
 

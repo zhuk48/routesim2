@@ -33,5 +33,9 @@ class Event:
             self.sim.add_node(self.arg1)
         if self.event_type == EVENT_TYPE.ADD_LINK:
             self.sim.add_link(self.arg1, self.arg2, self.arg3)
+        if self.event_type == EVENT_TYPE.CHANGE_LINK:
+            self.sim.change_link(self.arg1, self.arg2, self. arg3)
+        if self.event_type == EVENT_TYPE.DELETE_LINK:
+            self.sim.delete_link(self.arg1, self.arg2)
 
 

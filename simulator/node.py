@@ -1,8 +1,11 @@
+import logging
+
 class Node:
-    def __init__(self, id, sim):
+    def __init__(self, id):
         self.id = id
-        self.sim = sim
         self.table = Table()
+        self.neighbors = []
+        self.logging = logging.getLogger('Node %d' % self.id)
 
     def __str__(self):
         pass
@@ -20,10 +23,13 @@ class Node:
         pass
 
     def send_to_neighbors(self, m):
-        self.sim.send_to_neighbors(self, m)
+        from simulator.topology import Send_To_Neighbors
+        Send_To_Neighbors(self, m)
 
-    def get_neighbors(self):
-        return self.sim.get_neighbors(self)
+    def get_time(self):
+        from simulator.topology import Get_Time
+        return Get_Time()
+
 
 class Message:
     def __str__(self):

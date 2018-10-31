@@ -2,6 +2,7 @@ import heapq
 
 class Event_Queue:
     q = []
+    Current_Time = 0
 
     @staticmethod
     def Post(e):
@@ -11,7 +12,9 @@ class Event_Queue:
     def Get_Earliest():
         if Event_Queue.q == []:
             return None
-        return heapq.heappop(Event_Queue.q)
+        e = heapq.heappop(Event_Queue.q)
+        Event_Queue.Current_Time = e.time_stamp
+        return e
 
     @staticmethod
     def Str():
@@ -21,3 +24,6 @@ class Event_Queue:
             ans += "\n"
         return ans
 
+    @staticmethod
+    def Get_Current_Time():
+        return Event_Queue.Current_Time
