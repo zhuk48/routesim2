@@ -207,7 +207,7 @@ class Topology:
 def Send_To_Neighbors(node, m):
     Topology.this.send_to_neighbors(node.id, m)
 
-def Send_TO_Neighbor(node, neighbor, m):
+def Send_To_Neighbor(node, neighbor, m):
     Topology.this.send_to_neighbor(node.id, neighbor, m)
 
 def Get_Time():
