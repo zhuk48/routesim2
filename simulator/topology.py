@@ -186,7 +186,6 @@ class Topology:
                     Event_Queue.Post(Event(time_stamp, event_type, self, int(items[2]), int(items[3])))
                 elif num_args == 3:
                     Event_Queue.Post(Event(time_stamp, event_type, self, int(items[2]), int(items[3]), int(items[4])))
-
             f.close()
 
         except IOError as e:
@@ -203,9 +202,6 @@ class Topology:
             print(e)
             traceback.print_exc()
             sys.exit(-1)
-
-    # TODO: DRAW_PATH = "DRAW_PATH"
-
 
 
 def Send_To_Neighbors(node, m):
