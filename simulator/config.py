@@ -8,6 +8,12 @@ ROUTE_ALGORITHM = [
     "LINK_STATE"
 ]
 
+STEP_COMMAND = [
+    "NORMAL",
+    "SINGLE_STEP",
+    "NO_STOP"
+]
+
 ROUTE_ALGORITHM_NODE = {
     "GENERIC" : Generic_Node,
     "DISTANCE_VECTOR" : Distance_Vector_Node,
@@ -27,16 +33,25 @@ class EVENT_TYPE:
     DRAW_TOPOLOGY = "DRAW_TOPOLOGY"
     DRAW_PATH = "DRAW_PATH"
     DUMP_TABLE = "DUMP_TABLE"
+    DUMP_SIM = "DUMP_SIM"
+    DRAW_PATH = "DRAW_PATH"
+
+    ROUTING_MESSAGE_ARRIVAL = "ROUTING_MESSAGE_ARRIVAL"
 
 
 EVENT_PATH = "event/"
 
 TOPO_PATH = "topo/"
 
-USAGE_STR = "usage: sim.py route_algorithm topology event\n" \
+OUTPUT_PATH = "output/"
+# OUTPUT_PATH = "D:/output/"
+
+USAGE_STR = "usage: sim.py route_algorithm topology event [step=NORMAL]\n" \
             "\troute_algorithm\t- {GENERIC DISTANCE_VECTOR LINK_STATE}\n" \
             "\ttopology\t\t- a file\n" \
-            "\tevent\t\t\t- a file"
+            "\tevent\t\t\t- a file\n" \
+            "\tstep\t\t\t- {NORMAL SINGLE_STEP NO_STOP}"
+
 
 LOGGING_FORMAT = "[%(asctime)s][%(levelname)s] %(name)s: %(message)s"
 

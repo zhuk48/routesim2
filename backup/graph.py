@@ -44,7 +44,7 @@ nx.draw_networkx_edge_labels(G, position, edge_labels=edge_labels)
 
 plt.axis('off')
 plt.show()
-# plt.savefig('routing.pnd')
+plt.savefig('routing.png')
 
 class Test_Graph:
     def __init__(self):

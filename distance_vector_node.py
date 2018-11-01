@@ -18,9 +18,9 @@ class Distance_Vector_Node(Node):
     def process_incoming_routing_message(self, m):
         pass
 
-    # Return a neighbor
+    # Return a neighbor, -1 if no path to destination
     def get_next_hop(self, destination):
-        return 0
+        return -1
 
     # Return a Table()
     def get_routing_table(self):

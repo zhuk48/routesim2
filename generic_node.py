@@ -15,12 +15,15 @@ class Generic_Node(Node):
             self.neighbors.remove(neighbor)
         else:
             self.neighbors.append(neighbor)
+            # self.send_to_neighbors(Generic_Message())
+            self.send_to_neighbor(neighbor, Generic_Message())
+
         self.logging.debug('link update, neighbor %d, latency %d, time %d' % (neighbor, latency, self.get_time()))
 
-
     def process_incoming_routing_message(self, m):
-        self.send_to_neighbors(m)
+        self.logging.debug("receive a message at Time %d. " % self.get_time() + str(m))
 
+    # Return a neighbor, -1 if no path to destination
     def get_next_hop(self, destination):
         if self.neighbors != []:
             return self.neighbors[0]
@@ -29,12 +32,10 @@ class Generic_Node(Node):
     def get_routing_table(self):
         return self.table
 
-
 class Generic_Message(Message):
     def __str__(self):
-        return "A Generic Message\n"
-
+        return "A Generic Message"
 
 class Generic_Table(Table):
     def __str__(self):
-        return "A Generic Table\n"
+        return "A Generic Table, very cute (●ˇ∀ˇ●)"

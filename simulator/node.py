@@ -26,6 +26,10 @@ class Node:
         from simulator.topology import Send_To_Neighbors
         Send_To_Neighbors(self, m)
 
+    def send_to_neighbor(self, neighbor, m):
+        from simulator.topology import Send_TO_Neighbor
+        Send_TO_Neighbor(self, neighbor, m)
+
     def get_time(self):
         from simulator.topology import Get_Time
         return Get_Time()

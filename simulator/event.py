@@ -1,3 +1,5 @@
+import sys
+
 from simulator.config import *
 
 class Event:
@@ -11,10 +13,8 @@ class Event:
         self.arg2 = arg2
         self.arg3 = arg3
 
-
     def __lt__(self, other):
         return self.time_stamp < other.time_stamp
-
 
     def __str__(self):
         args = ""
@@ -27,17 +27,30 @@ class Event:
 
         return "Time_Stamp: " + str(self.time_stamp) + " Event_Type: " + self.event_type + args
 
-
     def dispatch(self):
         if self.event_type == EVENT_TYPE.ADD_NODE:
             self.sim.add_node(self.arg1)
-        if self.event_type == EVENT_TYPE.ADD_LINK:
+        elif self.event_type == EVENT_TYPE.ADD_LINK:
             self.sim.add_link(self.arg1, self.arg2, self.arg3)
-        if self.event_type == EVENT_TYPE.CHANGE_LINK:
+        elif self.event_type == EVENT_TYPE.CHANGE_LINK:
             self.sim.change_link(self.arg1, self.arg2, self. arg3)
-        if self.event_type == EVENT_TYPE.DELETE_LINK:
+        elif self.event_type == EVENT_TYPE.DELETE_LINK:
             self.sim.delete_link(self.arg1, self.arg2)
-        if self.event_type == EVENT_TYPE.DELETE_NODE:
+        elif self.event_type == EVENT_TYPE.DELETE_NODE:
             self.sim.delete_node(self.arg1)
-
-
+        elif self.event_type == EVENT_TYPE.PRINT:
+            self.sim.print_comment(self.arg1)
+        elif self.event_type == EVENT_TYPE.DUMP_TABLE:
+            self.sim.dump_table(self.arg1)
+        elif self.event_type == EVENT_TYPE.DRAW_TOPOLOGY:
+            self.sim.draw_topology()
+        elif self.event_type == EVENT_TYPE.ROUTING_MESSAGE_ARRIVAL:
+            self.sim.routing_message_arrival(self.arg1, self.arg2)
+        elif self.event_type == EVENT_TYPE.DUMP_SIM:
+            self.sim.dump_sim()
+        elif self.event_type == EVENT_TYPE.DRAW_PATH:
+            self.sim.draw_path(self.arg1, self.arg2)
+        else:
+            pass
+            # sys.stderr.write("Unknown event type %s" % self.event_type)
+            # sys.exit(-1)
