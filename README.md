@@ -1,3 +1,18 @@
+### PREREQUISITES:
+
+    $ pip install networkx matplotlib
+
+### TO RUN:
+
+    $ python sim.py GENERIC demo.topo demo.event
+
+### ON MURPHY:
+
+    $ scl enable rh-python35 bash
+    $ python3.5 -m venv --system-site-packages virtualenv
+    $ . virtualenv/bin/activate
+    $ pip install --user matplotlib networkx
+
 ### Different from minet lab:
 - Graph is undirected graph
     - Thus: we do not need to add link (2, 1) after add link (1, 2)
