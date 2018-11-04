@@ -1,5 +1,6 @@
 import heapq
 
+
 class Event_Queue:
     q = []
     Current_Time = 0

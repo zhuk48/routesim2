@@ -39,9 +39,11 @@ class Message:
     def __str__(self):
         pass
 
+
 class Table:
     def __str__(self):
         pass
+
 
 class Link:
     def __init__(self, node1, node2, latency):

@@ -1,5 +1,6 @@
 from simulator.node import Node, Message, Table
 
+
 class Distance_Vector_Node(Node):
     def __init__(self, id):
         super().__init__(id)

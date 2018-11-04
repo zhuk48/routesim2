@@ -1,5 +1,6 @@
 from simulator.node import Node, Message, Table
 
+
 class Generic_Node(Node):
     def __init__(self, id):
         super().__init__(id)
@@ -32,9 +33,11 @@ class Generic_Node(Node):
     def get_routing_table(self):
         return self.table
 
+
 class Generic_Message(Message):
     def __str__(self):
         return "A Generic Message"
+
 
 class Generic_Table(Table):
     def __str__(self):

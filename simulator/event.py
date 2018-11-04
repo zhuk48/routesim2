@@ -2,6 +2,7 @@ import sys
 
 from simulator.config import *
 
+
 class Event:
 
     def __init__(self, time_stamp, event_type, sim, arg1 = -1, arg2 = -1, arg3 = -1):
