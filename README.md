@@ -1,5 +1,6 @@
 ### PREREQUISITES:
 
+    # Python Version: 3.5/3.6
     $ pip install networkx matplotlib
 
 ### TO RUN:
@@ -50,6 +51,11 @@
         stop after an event
     2. NO_STOP
         no stop at all
+
+### Log Level
+    0. logging.DEBUG (recommand when debugging)
+    1. logging.INFO (default)
+    2. Logging.WARNING 
 
 ### topo command:
     0. # [comment]

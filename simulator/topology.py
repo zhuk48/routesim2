@@ -126,6 +126,9 @@ class Topology:
         self.wait()
 
     def draw_path(self, source, destination):
+        if (source not in self.__g.nodes) or  (destination not in self.__g.nodes) or (source == destination):
+            self.logging.warning("Parameters in DRAW_PATH are illegal.")
+
         user_path = [(0, 1), (1, 3), (3, 4)]
 
         correct_path = []
