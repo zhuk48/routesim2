@@ -127,7 +127,18 @@ class Topology:
 
     def draw_path(self, source, destination):
         user_path = [(0, 1), (1, 3), (3, 4)]
-        correct_path = [(0, 1), (1, 2), (2, 3), (3, 4)]
+
+        correct_path = []
+        shortest_path = []
+        try:
+            shortest_path = nx.algorithms.shortest_path(self.__g, source=source, target=destination, weight='latency')
+            print(shortest_path)
+        except:
+            print("No path from %d to %d, please correct event/topo file" % (source, destination))
+            sys.exit(-1)
+
+        for i in range(len(shortest_path) -1):
+            correct_path.append((shortest_path[i], shortest_path[i+1]))
 
         if self.position == None:
             self.position = nx.spring_layout(self.__g)
