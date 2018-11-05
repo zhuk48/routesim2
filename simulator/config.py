@@ -32,6 +32,7 @@ class EVENT_TYPE:
     PRINT = "PRINT"
     DRAW_TOPOLOGY = "DRAW_TOPOLOGY"
     DRAW_PATH = "DRAW_PATH"
+    DRAW_TREE = "DRAW_TREE"
     DUMP_TABLE = "DUMP_TABLE"
     DUMP_SIM = "DUMP_SIM"
 
@@ -43,7 +44,6 @@ EVENT_PATH = "event/"
 TOPO_PATH = "topo/"
 
 OUTPUT_PATH = "output/"
-# OUTPUT_PATH = "D:/output/"
 
 USAGE_STR = "usage: sim.py route_algorithm topology event [step=NORMAL]\n" \
             "\troute_algorithm\t- {GENERIC DISTANCE_VECTOR LINK_STATE}\n" \

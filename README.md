@@ -23,7 +23,7 @@
     2. Remove "bandwidth" from a link
         - 0 ADD_LINK 1 2 10 10 -> 0 ADD_LINK 1 2 10  // as well as CHANGE_LINK. DELETE_LINK only has two parameters.
 - Remove some not interested commands
-    1. DRAW_TREE [ID] . Since I think after implementing DRAW_PATH, we can see if it is easy to implemented in 
+~~1. DRAW_TREE [ID] . Since I think after implementing DRAW_PATH, we can see if it is easy to implemented in~~
     
 - Remove useless function
     1. ~~Remove "SendToNeighbor" function, only "SendToNeighbors" is useful.~~
@@ -84,11 +84,16 @@
         e.g. 10 PRINT "Debug information"
      7. [Time] DRAW_TOPOLOGY
         e.g. 10 DRAW_TOPOLOGY
-     8. [Time] DRAW_PATH [ID] [ID]
+     8. [Time] DRAW_PATH [ID1] [ID2]  # Draw shortest path from ID1 to ID2, Green path: correct path, Red path: your path
         e.g. 1000 DRAW_PATH 1 2
+     9. [Time] DRAW_TREE [ID] # Draw minimum spanning tree, take ID as root
+        e.g. 1000 DRAW_TREE 1
 
-     9. [Time] DUMP_TABLE [ID]
+     10. [Time] DUMP_TABLE [ID]
         e.g. 10 DUMP_TABLE 1
-     10. [Time] DUMP_SIM
+     11. [Time] DUMP_SIM
         e.g. 1 DUMP_SIM # It will print topology and event stack. For debug purpose.
 
+### Layout options for graph
+    - spring_layout (default)
+    - https://networkx.github.io/documentation/stable/reference/drawing.html#layout

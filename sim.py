@@ -64,6 +64,6 @@ def main():
 
 if __name__ == '__main__':
     # Try: python sim.py GENERIC demo.topo demo.event
-    # Change logging level to INFO or WARNING, if DEBUG information bothers you
-    logging.basicConfig(level=logging.DEBUG, format=LOGGING_FORMAT, datefmt=LOGGING_DATAFMT)
+    # Change logging level from DEBUG to INFO or WARNING, if DEBUG information bothers you
+    logging.basicConfig(level=logging.INFO, format=LOGGING_FORMAT, datefmt=LOGGING_DATAFMT)
     main()

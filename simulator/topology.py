@@ -126,16 +126,35 @@ class Topology:
         self.wait()
 
     def get_correct_path(self, source, destination):
-        correct_path = []
         try:
             shortest_path = nx.algorithms.shortest_path(self.__g, source=source, target=destination, weight='latency')
         except:
             self.logging.warning("No path from %d to %d, please correct event/topo file" % (source, destination))
             return None
 
+        correct_path = []
         for i in range(len(shortest_path) - 1):
             correct_path.append((shortest_path[i], shortest_path[i + 1]))
-        return  correct_path
+        return correct_path
+
+    def get_tree_correct_path(self, source):
+        try:
+            shortest_tree = nx.algorithms.shortest_path(self.__g, source=source, weight='latency')
+        except:
+            self.logging.warning("No Tree from %d, please correct event/topo file" % source)
+            return None
+
+        correct_path_set = set()
+        for s in shortest_tree.keys():
+            if s == source:
+                continue
+            for i in range(len(shortest_tree[s]) -1):
+                correct_path_set.add((shortest_tree[s][i], shortest_tree[s][i + 1]))
+
+        destination_list = list(shortest_tree.keys())
+        destination_list.remove(source)
+
+        return list(correct_path_set), destination_list
 
     def get_user_path(self, source, destination):
         path = [source]
@@ -154,27 +173,62 @@ class Topology:
 
         user_path = []
         for i in range(len(path) - 1):
+            if (path[i], path[i + 1]) not in self.__g.edges:
+                self.logging.warning("Link from %d to %d does not exists, you cannot use it" % (path[i], path[i + 1]))
+                return None
             user_path.append((path[i], path[i + 1]))
         return  user_path
+
+    def get_tree_user_path(self, source, destination_list):
+        user_path_set = set()
+        for d in destination_list:
+            path_for_d = self.get_user_path(source, d)
+            if path_for_d == None or path_for_d == []:
+                self.logging.warning("You algorithm cannot find a path from %d to %d." % (source, d))
+            else:
+                for p in path_for_d:
+                    user_path_set.add(p)
+
+        return list(user_path_set)
 
     def draw_path(self, source, destination):
         if (source not in self.__g.nodes) or  (destination not in self.__g.nodes) or (source == destination):
             self.logging.warning("Parameters in DRAW_PATH are illegal.")
+            return
 
         correct_path = self.get_correct_path(source, destination)
-        # user_path = [(0, 1), (1, 3), (3, 4)]
-        user_path = self.get_user_path(source, destination)
-
         if correct_path == None:
             return
 
-        if self.position == None:
-            self.position = nx.spring_layout(self.__g)
+        # user_path = [(0, 1), (1, 3), (3, 4)]
+        user_path = self.get_user_path(source, destination)
 
         red_nodes = [source, destination]
         blue_nodes = list(self.__g.nodes)
         for node in red_nodes:
             blue_nodes.remove(node)
+
+        self.draw_in_networkx(red_nodes, blue_nodes, correct_path, user_path)
+
+    def draw_tree(self, source):
+        if source not in self.__g.nodes:
+            self.logging.warning("Parameter in DRAW_TREE is illegal.")
+            return
+
+        correct_path, destination_list = self.get_tree_correct_path(source)
+        if correct_path == None or correct_path == []:
+            return
+
+        user_path = self.get_tree_user_path(source, destination_list)
+        red_nodes = [source]
+        blue_nodes = list(self.__g.nodes)
+        blue_nodes.remove(source)
+
+        self.draw_in_networkx(red_nodes, blue_nodes, correct_path, user_path)
+
+    def draw_in_networkx(self, red_nodes, blue_nodes, correct_path, user_path):
+        if self.position == None:
+            self.position = nx.spring_layout(self.__g)
 
         nx.draw_networkx_nodes(self.__g, self.position, nodelist=blue_nodes, node_size=600, node_color='b', alpha=0.7)
         nx.draw_networkx_nodes(self.__g, self.position, nodelist=red_nodes, node_size=700, node_color='r', alpha=0.6)
@@ -194,11 +248,12 @@ class Topology:
         self.wait()
 
 
+
+
     def wait(self):
         if self.step == STEP_COMMAND[2]:
             return
         input('Press Enter to Continue...')
-
 
     def load_command_file(self, file):
         try:

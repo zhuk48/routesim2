@@ -51,6 +51,8 @@ class Event:
             self.sim.dump_sim()
         elif self.event_type == EVENT_TYPE.DRAW_PATH:
             self.sim.draw_path(self.arg1, self.arg2)
+        elif self.event_type == EVENT_TYPE.DRAW_TREE:
+            self.sim.draw_tree(self.arg1)
         else:
             pass
             # sys.stderr.write("Unknown event type %s" % self.event_type)

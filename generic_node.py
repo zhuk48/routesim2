@@ -12,7 +12,8 @@ class Generic_Node(Node):
 
     def link_has_been_updated(self, neighbor, latency):
         # latency = -1 if delete a link
-        if latency == -1:
+        if latency == -1 and neighbor in self.neighbors:
+
             self.neighbors.remove(neighbor)
         else:
             self.neighbors.append(neighbor)
