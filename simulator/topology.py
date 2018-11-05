@@ -125,23 +125,48 @@ class Topology:
         plt.close(OUTPUT_PATH + filename)
         self.wait()
 
+    def get_correct_path(self, source, destination):
+        correct_path = []
+        try:
+            shortest_path = nx.algorithms.shortest_path(self.__g, source=source, target=destination, weight='latency')
+        except:
+            self.logging.warning("No path from %d to %d, please correct event/topo file" % (source, destination))
+            return None
+
+        for i in range(len(shortest_path) - 1):
+            correct_path.append((shortest_path[i], shortest_path[i + 1]))
+        return  correct_path
+
+    def get_user_path(self, source, destination):
+        path = [source]
+
+        while destination not in path:
+            next = Topology.Nodes[path[-1]].get_next_hop(destination)
+            if next == None:
+                self.logging.warning("You algorithm cannot find a path from %d to %d. Output: %s." % (source, destination, str(path)))
+                return None
+            elif next == -1 or next not in self.__g.nodes or next in path:
+                path.append(next)
+                self.logging.warning(
+                    "You algorithm cannot find a path from %d to %d. Output: %s." % (source, destination, str(path)))
+                return None
+            path.append(next)
+
+        user_path = []
+        for i in range(len(path) - 1):
+            user_path.append((path[i], path[i + 1]))
+        return  user_path
+
     def draw_path(self, source, destination):
         if (source not in self.__g.nodes) or  (destination not in self.__g.nodes) or (source == destination):
             self.logging.warning("Parameters in DRAW_PATH are illegal.")
 
-        user_path = [(0, 1), (1, 3), (3, 4)]
+        correct_path = self.get_correct_path(source, destination)
+        # user_path = [(0, 1), (1, 3), (3, 4)]
+        user_path = self.get_user_path(source, destination)
 
-        correct_path = []
-        shortest_path = []
-        try:
-            shortest_path = nx.algorithms.shortest_path(self.__g, source=source, target=destination, weight='latency')
-            print(shortest_path)
-        except:
-            print("No path from %d to %d, please correct event/topo file" % (source, destination))
-            sys.exit(-1)
-
-        for i in range(len(shortest_path) -1):
-            correct_path.append((shortest_path[i], shortest_path[i+1]))
+        if correct_path == None:
+            return
 
         if self.position == None:
             self.position = nx.spring_layout(self.__g)
@@ -156,7 +181,8 @@ class Topology:
         nx.draw_networkx_labels(self.__g, self.position, labels=self.node_labels(), font_size=14, font_color='w')
 
         nx.draw_networkx_edges(self.__g, self.position, width=2, alpha=0.5)
-        nx.draw_networkx_edges(self.__g, self.position, edgelist=user_path, width=6, edge_color='r', alpha=0.4)
+        if user_path != None:
+            nx.draw_networkx_edges(self.__g, self.position, edgelist=user_path, width=6, edge_color='r', alpha=0.4)
         nx.draw_networkx_edges(self.__g, self.position, edgelist=correct_path, width=3, edge_color='g', alpha=0.8)
         nx.draw_networkx_edge_labels(self.__g, self.position, edge_labels=self.edge_labels(), font_size=14)
         plt.axis('off')
