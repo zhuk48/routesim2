@@ -41,8 +41,8 @@ class Event:
             self.sim.delete_node(self.arg1)
         elif self.event_type == EVENT_TYPE.PRINT:
             self.sim.print_comment(self.arg1)
-        elif self.event_type == EVENT_TYPE.DUMP_TABLE:
-            self.sim.dump_table(self.arg1)
+        elif self.event_type == EVENT_TYPE.DUMP_NODE:
+            self.sim.dump_node(self.arg1)
         elif self.event_type == EVENT_TYPE.DRAW_TOPOLOGY:
             self.sim.draw_topology()
         elif self.event_type == EVENT_TYPE.ROUTING_MESSAGE_ARRIVAL:

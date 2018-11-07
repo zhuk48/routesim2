@@ -77,9 +77,9 @@ class Topology:
         else:
             self.logging.warning("remove node %d does not exit" % node)
 
-    def dump_table(self, node):
+    def dump_node(self, node):
         if (node in self.__g.nodes) and (node in Topology.Nodes.keys()):
-            self.logging.info('DUMP_TABLE: ' + str(Topology.Nodes[node].table))
+            self.logging.info('DUMP_NODE: ' + str(Topology.Nodes[node]))
         else:
             self.logging.warning("node %d does not exit" % node)
 

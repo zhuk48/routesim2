@@ -16,8 +16,8 @@ class Generic_Node(Node):
             self.neighbors.remove(neighbor)
         else:
             self.neighbors.append(neighbor)
-            # self.send_to_neighbors(Generic_Message())
-            self.send_to_neighbor(neighbor, Generic_Message())
+            # self.send_to_neighbors("hello")
+            self.send_to_neighbor(neighbor, "hello")
 
         self.logging.debug('link update, neighbor %d, latency %d, time %d' % (neighbor, latency, self.get_time()))
 

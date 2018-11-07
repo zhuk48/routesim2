@@ -89,8 +89,8 @@
      9. [Time] DRAW_TREE [ID] # Draw minimum spanning tree, take ID as root
         e.g. 1000 DRAW_TREE 1
 
-     10. [Time] DUMP_TABLE [ID]
-        e.g. 10 DUMP_TABLE 1
+     10. [Time] DUMP_NODE [ID]
+        e.g. 10 DUMP_NODE 1
      11. [Time] DUMP_SIM
         e.g. 1 DUMP_SIM # It will print topology and event stack. For debug purpose.
 
