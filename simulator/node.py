@@ -3,7 +3,6 @@ import logging
 class Node:
     def __init__(self, id):
         self.id = id
-        self.table = Table()
         self.neighbors = []
         self.logging = logging.getLogger('Node %d' % self.id)
 
@@ -13,7 +12,7 @@ class Node:
     def link_has_been_updated(self, neighbor, latency):
         pass
 
-    def process_incoming_routing_message(self, m):
+    def process_incoming_routing_message(self, m: str):
         pass
 
     def get_next_hop(self, destination):
@@ -22,27 +21,17 @@ class Node:
     def get_routing_table(self):
         pass
 
-    def send_to_neighbors(self, m):
+    def send_to_neighbors(self, message: str):
         from simulator.topology import Send_To_Neighbors
-        Send_To_Neighbors(self, m)
+        Send_To_Neighbors(self, message)
 
-    def send_to_neighbor(self, neighbor, m):
+    def send_to_neighbor(self, neighbor, message: str):
         from simulator.topology import Send_To_Neighbor
-        Send_To_Neighbor(self, neighbor, m)
+        Send_To_Neighbor(self, neighbor, message)
 
     def get_time(self):
         from simulator.topology import Get_Time
         return Get_Time()
-
-
-class Message:
-    def __str__(self):
-        pass
-
-
-class Table:
-    def __str__(self):
-        pass
 
 
 class Link:
