@@ -29,10 +29,24 @@
     1. ~~Remove "SendToNeighbor" function, only "SendToNeighbors" is useful.~~
     1.1. I add "send to neighbor" function back. We can use it to confuse students. ( •̀ ω •́ )y
     2. Remove "GetNeighbors" function. Node can only know their neighbors by "link_has_been_updated"
+       
+- Remove send_current_links() function
+    - There is a logic bug in Minet Add_Link Logic, since it reused in both topo file and event file
+    - There for, call Add_link in runtime will not call link_has_been_updated
+    - Change:
+        - remove send_current_links() function after load topology
+        - Call link_has_been_updated after Add_Link
+    - However, it will introduce a bug in send_to_neighors(). Because we many add many links in one seconds. And call simulator does not know correct neighbor set in the middle.
+    - Solution:
+        - Introduce a "SEND_LINK" event
+        - Post two "SEND_LINK" event afters process ADD_LINK
+        - Change cmp function of Event, "SEND_LINK" will run lastest at that second.  
+    
 ### Functions provide in Node class
     0. send_to_neighbors(m)  // send message to neighbors
     1. send_to_neighbor(neighbor, m) // send message to a neighbor
     2. get_time()  // get current simulator time (I think maybe useful in Link_State, since I use it last year.)
+    3. link_has_been_updated() // will be called by simulator after processing every event in that second.
     
 
 ### Question

@@ -15,6 +15,9 @@ class Event:
         self.arg3 = arg3
 
     def __lt__(self, other):
+        if self.time_stamp == other.time_stamp:
+            if self.event_type != EVENT_TYPE.SEND_LINK and other.event_type == EVENT_TYPE.SEND_LINK:
+                return True
         return self.time_stamp < other.time_stamp
 
     def __str__(self):
@@ -53,6 +56,8 @@ class Event:
             self.sim.draw_path(self.arg1, self.arg2)
         elif self.event_type == EVENT_TYPE.DRAW_TREE:
             self.sim.draw_tree(self.arg1)
+        elif self.event_type == EVENT_TYPE.SEND_LINK:
+            self.sim.send_link(self.arg1, self.arg2, self.arg3)
         else:
             pass
             # sys.stderr.write("Unknown event type %s" % self.event_type)

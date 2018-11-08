@@ -36,7 +36,9 @@ class EVENT_TYPE:
     DUMP_NODE = "DUMP_NODE"
     DUMP_SIM = "DUMP_SIM"
 
+    # Not for user
     ROUTING_MESSAGE_ARRIVAL = "ROUTING_MESSAGE_ARRIVAL"
+    SEND_LINK = "SEND_LINK"
 
 
 EVENT_PATH = "event/"

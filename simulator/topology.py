@@ -32,10 +32,6 @@ class Topology:
             ans += "\n"
         return ans
 
-    def send_current_links(self):
-        for node1, node2 in self.__g.edges:
-            self.change_link(node1, node2, self.__g[node1][node2]['latency'])
-
     def add_node(self, node):
         if node not in Topology.Nodes.keys():
             self.position = None
@@ -49,20 +45,32 @@ class Topology:
         self.add_node(node1)
         self.add_node(node2)
         self.__g.add_edge(node1, node2, latency = latency)
+        self.post_send_link(node1, node2, latency)
+        self.post_send_link(node2, node1, latency)
 
     def change_link(self, node1, node2, latency):
-        if latency != -1:
-            self.add_link(node1, node2, latency)
-        self.send_link(Topology.Nodes[node1], node2, latency)
-        self.send_link(Topology.Nodes[node2], node1, latency)
+        self.add_link(node1, node2, latency)
 
     def send_link(self, node, neighbor, latency):
-        node.link_has_been_updated(neighbor, latency)
+        Topology.Nodes[node].link_has_been_updated(neighbor, latency)
+
+    def post_send_link(self, node, neighbor, latency):
+        Event_Queue.Post(
+            Event(
+                Get_Time(),
+                EVENT_TYPE.SEND_LINK,
+                self,
+                node,
+                neighbor,
+                latency
+            )
+        )
 
     def delete_link(self, node1, node2):
         if (node1, node2) in self.__g.edges:
             self.__g.remove_edge(node1, node2)
-            self.change_link(node1, node2, -1)
+            self.post_send_link(node1, node2, -1)
+            self.post_send_link(node2, node1, -1)
         else:
             self.logging.warning("remove link (%d, %d) does not exit" % (node1, node2))
 
@@ -123,7 +131,6 @@ class Topology:
         plt.savefig(OUTPUT_PATH + filename) # call savefig before show
         plt.show()
         plt.close(OUTPUT_PATH + filename)
-        self.wait()
 
     def get_correct_path(self, source, destination):
         try:
@@ -181,13 +188,17 @@ class Topology:
 
     def get_tree_user_path(self, source, destination_list):
         user_path_set = set()
+        solved_destination_set = set()
         for d in destination_list:
+            if d in solved_destination_set:
+                continue
             path_for_d = self.get_user_path(source, d)
             if path_for_d == None or path_for_d == []:
                 self.logging.warning("You algorithm cannot find a path from %d to %d." % (source, d))
             else:
                 for p in path_for_d:
                     user_path_set.add(p)
+                    solved_destination_set.add(p[1])
 
         return list(user_path_set)
 
@@ -245,10 +256,6 @@ class Topology:
         plt.savefig(OUTPUT_PATH + filename)  # call savefig before show
         plt.show()
         plt.close(OUTPUT_PATH + filename)
-        self.wait()
-
-
-
 
     def wait(self):
         if self.step == STEP_COMMAND[2]:

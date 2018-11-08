@@ -13,7 +13,6 @@ class Sim(Topology):
         self.load_topo(TOPO_PATH + topo_file)
         self.load_event(EVENT_PATH + event_file)
         self.dump_sim()
-        self.send_current_links()
         self.dispatch_event(self.step)
 
     def __str__(self):
