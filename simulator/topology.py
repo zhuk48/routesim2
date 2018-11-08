@@ -21,6 +21,7 @@ class Topology:
         self.step = step
         self.logging = logging.getLogger('Sim')
         self.position = None
+        self.message_count = 0
         Topology.Nodes = {}
         Topology.this = self
 
@@ -111,6 +112,7 @@ class Topology:
         )
 
     def routing_message_arrival(self, neighbor, m):
+        self.message_count += 1
         if neighbor in self.__g.nodes:
             Topology.Nodes[neighbor].process_incoming_routing_message(m)
 

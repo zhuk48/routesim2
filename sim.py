@@ -14,6 +14,7 @@ class Sim(Topology):
         self.load_event(EVENT_PATH + event_file)
         self.dump_sim()
         self.dispatch_event(self.step)
+        self.logging.info("Total messages sent: %d" % self.message_count)
 
     def __str__(self):
         ans = "==== Print Topology ====\n"
