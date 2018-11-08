@@ -162,12 +162,12 @@ class Topology:
         while destination not in path:
             next = Topology.Nodes[path[-1]].get_next_hop(destination)
             if next == None:
-                self.logging.warning("You algorithm cannot find a path from %d to %d. Output: %s." % (source, destination, str(path)))
+                self.logging.warning("Your algorithm cannot find a path from %d to %d. Output: %s." % (source, destination, str(path)))
                 return None
             elif next == -1 or next not in self.__g.nodes or next in path:
                 path.append(next)
                 self.logging.warning(
-                    "You algorithm cannot find a path from %d to %d. Output: %s." % (source, destination, str(path)))
+                    "Your algorithm cannot find a path from %d to %d. Output: %s." % (source, destination, str(path)))
                 return None
             path.append(next)
 
