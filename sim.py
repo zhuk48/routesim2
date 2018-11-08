@@ -30,7 +30,7 @@ class Sim(Topology):
         e = Event_Queue.Get_Earliest()
         while e:
             e.dispatch()
-            if step == STEP_COMMAND[1]:
+            if step == 'SINGLE_STEP':
                 self.logging.info(str(e))
                 self.wait()
             e = Event_Queue.Get_Earliest()
@@ -51,7 +51,7 @@ def main():
         sys.stderr.write(USAGE_STR)
         sys.exit(-1)
 
-    step = 'NORMAL'
+    step = 'NO_STOP'
     if len(sys.argv) == 5:
         if sys.argv[4] not in STEP_COMMAND:
             sys.stderr.write(USAGE_STR)

@@ -135,6 +135,7 @@ class Topology:
         plt.savefig(OUTPUT_PATH + filename) # call savefig before show
         plt.show()
         plt.close(OUTPUT_PATH + filename)
+        self.wait()
 
     def get_correct_path(self, source, destination):
         try:
@@ -260,9 +261,10 @@ class Topology:
         plt.savefig(OUTPUT_PATH + filename)  # call savefig before show
         plt.show()
         plt.close(OUTPUT_PATH + filename)
+        self.wait()
 
     def wait(self):
-        if self.step == STEP_COMMAND[2]:
+        if self.step == 'NO_STOP':
             return
         input('Press Enter to Continue...')
 
