@@ -52,6 +52,8 @@ class Topology:
         self.add_link(node1, node2, latency)
 
     def send_link(self, node, neighbor, latency):
+        if node not in Topology.Nodes:
+            return
         Topology.Nodes[node].link_has_been_updated(neighbor, latency)
 
     def post_send_link(self, node, neighbor, latency):
