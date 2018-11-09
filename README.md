@@ -12,7 +12,7 @@ This code is written for Python 3 and it was tested on version 3.5.  Run the fol
 
 ### Running:
 
-    $ python sim.py GENERIC demo.event
+    $ python3 sim.py GENERIC demo.event
     
 The first parameter can be either GENERIC, LINK_STATE, or DISTANCE_VECTOR.  The second parameter specifies the input file.
 

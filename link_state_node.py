@@ -1,7 +1,7 @@
 from simulator.node import Node
 
 
-class Distance_Vector_Node(Node):
+class Link_State_Node(Node):
     def __init__(self, id):
         super().__init__(id)
 
