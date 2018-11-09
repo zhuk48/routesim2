@@ -8,10 +8,9 @@ from simulator.event_queue import Event_Queue
 
 class Sim(Topology):
 
-    def __init__(self, algorithm, topo_file, event_file, step='NORMAL'):
+    def __init__(self, algorithm, event_file, step='NORMAL'):
         super().__init__(algorithm, step)
-        self.load_topo(TOPO_PATH + topo_file)
-        self.load_event(EVENT_PATH + event_file)
+        self.load_command_file(event_file)
         self.dump_sim()
         self.dispatch_event(self.step)
         self.logging.info("Total messages sent: %d" % self.message_count)
@@ -35,35 +34,28 @@ class Sim(Topology):
                 self.wait()
             e = Event_Queue.Get_Earliest()
 
-    def load_topo(self, topo_file):
-        self.load_event(topo_file)
-        self.dispatch_event()
-
-    def load_event(self, file):
-        self.load_command_file(file)
-
     def print_comment(self, comment):
         self.logging.info('Time: %d, Comment: %s' % (Get_Time(), comment))
 
 
 def main():
-    if len(sys.argv) < 4 or len(sys.argv) > 5 or sys.argv[1] not in ROUTE_ALGORITHM:
+    if len(sys.argv) < 3 or len(sys.argv) > 4 or sys.argv[1] not in ROUTE_ALGORITHM:
         sys.stderr.write(USAGE_STR)
         sys.exit(-1)
 
     step = 'NO_STOP'
-    if len(sys.argv) == 5:
-        if sys.argv[4] not in STEP_COMMAND:
+    if len(sys.argv) == 4:
+        if sys.argv[3] not in STEP_COMMAND:
             sys.stderr.write(USAGE_STR)
             sys.exit(-1)
         else:
-            step = sys.argv[4]
+            step = sys.argv[3]
 
-    s = Sim(sys.argv[1], sys.argv[2], sys.argv[3], step)
+    s = Sim(sys.argv[1], sys.argv[2], step)
 
 
 if __name__ == '__main__':
-    # Try: python sim.py GENERIC demo.topo demo.event
+    # Try: python sim.py GENERIC demo.event
     # Change logging level from DEBUG to INFO or WARNING, if DEBUG information bothers you
     logging.basicConfig(level=logging.INFO, format=LOGGING_FORMAT, datefmt=LOGGING_DATAFMT)
     main()

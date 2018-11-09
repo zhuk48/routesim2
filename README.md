@@ -5,7 +5,7 @@
 
 ### TO RUN:
 
-    $ python sim.py GENERIC demo.topo demo.event
+    $ python sim.py GENERIC demo.event
 
 ### ON MURPHY:
 
@@ -70,14 +70,6 @@
     0. logging.DEBUG (recommand when debugging)
     1. logging.INFO (default)
     2. Logging.WARNING 
-
-### topo command:
-    0. # [comment]
-        e.g. # this is a comment
-    1. [Time] ADD_NODE [ID], # [ID] is any hashable value
-        e.g., 0 ADD_NODE 1
-    2. [Time] ADD_LINK [ID1] [ID2] [LATENCY], # will create a new node if does not exist
-        e.g., 0 ADD_LINK 1 2 10
 
 ### event command:
      0. # [comment]

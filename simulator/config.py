@@ -41,15 +41,10 @@ class EVENT_TYPE:
     SEND_LINK = "SEND_LINK"
 
 
-EVENT_PATH = "event/"
-
-TOPO_PATH = "topo/"
-
 OUTPUT_PATH = "output/"
 
-USAGE_STR = "usage: sim.py route_algorithm topology event [step=NORMAL]\n" \
+USAGE_STR = "usage: sim.py route_algorithm event [step=NORMAL]\n" \
             "\troute_algorithm\t- {GENERIC DISTANCE_VECTOR LINK_STATE}\n" \
-            "\ttopology\t\t- a file\n" \
             "\tevent\t\t\t- a file\n" \
             "\tstep\t\t\t- {NORMAL SINGLE_STEP NO_STOP}"
 
