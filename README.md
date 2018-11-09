@@ -1,77 +1,36 @@
-### PREREQUISITES:
+# Routesim2
 
-    # Python Version: 3.5/3.6
+This is a simple network routing simulator written in Python.  It was primarily written by Kaiyu Hou, with minor tweaks by Steve Tarzia.  This code is based on the C++ Routesim code written by Peter Dinda.
+
+This code is the basis for a programming project for Northwestern's University's EECS-340 Introduction to Computer Networking.
+
+### Prerequisites:
+
+This code is written for Python 3 and it was tested on version 3.5.  Run the following to install the two required packages:
+
     $ pip install networkx matplotlib
 
-### TO RUN:
+### Running:
 
     $ python sim.py GENERIC demo.event
+    
+The first parameter can be either GENERIC, LINK_STATE, or DISTANCE_VECTOR.  The second parameter specifies the input file.
 
-### ON MURPHY:
+### Running on Murphy:
+
+For EECS-340, the murphy.wot.eecs.northwestern.edu machine does have Python 3 installed, but you have to run some special commands to access it:
 
     $ scl enable rh-python35 bash
-    $ python3.5 -m venv --system-site-packages virtualenv
-    $ . virtualenv/bin/activate
     $ pip install --user matplotlib networkx
-
-### Different from minet lab:
-- Graph is undirected graph
-    - Thus: we do not need to add link (2, 1) after add link (1, 2)
-- Remove useless parameters
-    1. Remove "bandwidth" and "latency" from a node
-        - 0 ADD_NODE 1 1 1 -> 0 ADD_NODE 1 // as well as DELETE_NODE
-    2. Remove "bandwidth" from a link
-        - 0 ADD_LINK 1 2 10 10 -> 0 ADD_LINK 1 2 10  // as well as CHANGE_LINK. DELETE_LINK only has two parameters.
-- Remove some not interested commands
-~~1. DRAW_TREE [ID] . Since I think after implementing DRAW_PATH, we can see if it is easy to implemented in~~
-    
-- Remove useless function
-    1. ~~Remove "SendToNeighbor" function, only "SendToNeighbors" is useful.~~
-    1.1. I add "send to neighbor" function back. We can use it to confuse students. ( •̀ ω •́ )y
-    2. Remove "GetNeighbors" function. Node can only know their neighbors by "link_has_been_updated"
-       
-- Remove send_current_links() function
-    - There is a logic bug in Minet Add_Link Logic, since it reused in both topo file and event file
-    - There for, call Add_link in runtime will not call link_has_been_updated
-    - Change:
-        - remove send_current_links() function after load topology
-        - Call link_has_been_updated after Add_Link
-    - However, it will introduce a bug in send_to_neighors(). Because we many add many links in one seconds. And call simulator does not know correct neighbor set in the middle.
-    - Solution:
-        - Introduce a "SEND_LINK" event
-        - Post two "SEND_LINK" event afters process ADD_LINK
-        - Change cmp function of Event, "SEND_LINK" will run lastest at that second.  
+    $ python3 sim.py GENERIC demo.event 
     
 ### Functions provide in Node class
     0. send_to_neighbors(m)  // send message to neighbors
     1. send_to_neighbor(neighbor, m) // send message to a neighbor
     2. get_time()  // get current simulator time (I think maybe useful in Link_State, since I use it last year.)
     3. link_has_been_updated() // will be called by simulator after processing every event in that second.
-    
 
-### Question
-- If message arrive time = message send time + latency, a problem comes
-    - suppose latency A to B is 100, A send message 1 at time 0, and will arrive at time 100
-    - however, a link change is called at time 10, latency updated to 20
-    - A send message 2 at time 20
-    - message 2 should arrive at time 40
-    - Then, how about message 1? arrive at 100 or at 40, or at 30?
-    - In minet, it set to 100
-
-### step options:
-    0. NORMAL
-        only stop when a picture is 
-    1. SINGLE_STEP
-        stop after an event
-    2. NO_STOP
-        no stop at all
-
-### Log Level
-    0. logging.DEBUG (recommand when debugging)
-    1. logging.INFO (default)
-    2. Logging.WARNING 
-
-### event command:
+### Event commands:
      0. # [comment]
         e.g. # this is a comment
 
@@ -100,6 +59,3 @@
      11. [Time] DUMP_SIM
         e.g. 1 DUMP_SIM # It will print topology and event stack. For debug purpose.
 
-### Layout options for graph
-    - spring_layout (default)
-    - https://networkx.github.io/documentation/stable/reference/drawing.html#layout
