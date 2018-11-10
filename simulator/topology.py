@@ -218,7 +218,6 @@ class Topology:
         if correct_path == None:
             return
 
-        # user_path = [(0, 1), (1, 3), (3, 4)]
         user_path = self.get_user_path(source, destination)
 
         red_nodes = [source, destination]
