@@ -22,6 +22,7 @@ class Topology:
         self.logging = logging.getLogger('Sim')
         self.position = None
         self.message_count = 0
+        self.print_count = 0
         Topology.Nodes = {}
         Topology.this = self
 
@@ -131,7 +132,8 @@ class Topology:
         nx.draw_networkx_edge_labels(self.__g, self.position, edge_labels=self.edge_labels(), font_size=14)
         plt.axis('off')
 
-        filename = 'Topo_' + time.strftime("%H_%M_%S", time.localtime()) + '_Time_' + str(Get_Time()) + '.png'
+        filename = 'Topo_' + time.strftime("%H_%M_%S", time.localtime()) + '_Count_' + str(self.print_count) + '_Time_' + str(Get_Time()) + '.png'
+        self.print_count += 1
         plt.savefig(OUTPUT_PATH + filename) # call savefig before show
         plt.show()
         plt.close(OUTPUT_PATH + filename)
@@ -257,7 +259,8 @@ class Topology:
         nx.draw_networkx_edge_labels(self.__g, self.position, edge_labels=self.edge_labels(), font_size=14)
         plt.axis('off')
 
-        filename = 'Topo_' + time.strftime("%H_%M_%S", time.localtime()) + '_Time_' + str(Get_Time()) + '.png'
+        filename = 'Topo_' + time.strftime("%H_%M_%S", time.localtime()) + '_Count_' + str(self.print_count) + '_Time_' + str(Get_Time()) + '.png'
+        self.print_count += 1
         plt.savefig(OUTPUT_PATH + filename)  # call savefig before show
         plt.show()
         plt.close(OUTPUT_PATH + filename)

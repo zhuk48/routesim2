@@ -20,7 +20,7 @@ def generate_simulation(n, degree, time, filename):
     with open("%s.event" % filename, "w") as file:
         # create nodes
         for i in range(n):
-            file.write("0 ADD_NODE %d 0 0\n" % i)
+            file.write("0 ADD_NODE %d\n" % i)
         # create random edges for each node
         for i in range(n):
             # don't make links truly random, favor nodes with nearby indexes
