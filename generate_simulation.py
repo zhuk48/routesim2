@@ -17,6 +17,7 @@ def generate_simulation(n, degree, time, filename):
     links = []
 
     print("writing %s.event" % filename)
+    link_time = 1
     with open("%s.event" % filename, "w") as file:
         # create nodes
         for i in range(n):
@@ -38,11 +39,13 @@ def generate_simulation(n, degree, time, filename):
                 possible_neighbors.remove(neighbor)
                 link = (i, neighbor, random_weight())
                 links.extend([link])
-                file.write("0 ADD_LINK %d %d %d\n" % link)
+                file.write("%d ADD_LINK %d %d %d\n" % ((link_time,) + link))
+                link_time += 1
+                # above, we actually create links at different times just in case they are duplicated
 
         # change links
-        file.write("1 DRAW_TOPOLOGY\n");
-        for t in range(time):
+        file.write("%d DRAW_TOPOLOGY\n" % link_time);
+        for t in range(link_time+1, time):
             # link change events are a poisson process.
             # we want the time between events to be roughly 10 * MAX_LATENCY
             if 0 == random.randint(0, 10 * MAX_LATENCY):
