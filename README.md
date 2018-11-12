@@ -27,7 +27,7 @@ For EECS-340, the murphy.wot.eecs.northwestern.edu machine does have Python 3 in
 ### Functions provide in Node class
     0. send_to_neighbors(m)  // send message to neighbors
     1. send_to_neighbor(neighbor, m) // send message to a neighbor
-    2. get_time()  // get current simulator time (I think maybe useful in Link_State, since I use it last year.)
+    2. get_time()  // get current simulator time
     3. link_has_been_updated() // will be called by simulator after processing every event in that second.
 
 ### Event commands:
