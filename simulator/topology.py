@@ -246,6 +246,9 @@ class Topology:
     def draw_in_networkx(self, red_nodes, blue_nodes, correct_path, user_path):
         if self.position == None:
             self.position = nx.spring_layout(self.__g)
+            
+        print("correct_path: " + str(correct_path))
+        print("student_path: " + str(user_path))
 
         nx.draw_networkx_nodes(self.__g, self.position, nodelist=blue_nodes, node_size=600, node_color='b', alpha=0.7)
         nx.draw_networkx_nodes(self.__g, self.position, nodelist=red_nodes, node_size=700, node_color='r', alpha=0.6)
