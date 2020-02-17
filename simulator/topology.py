@@ -201,7 +201,7 @@ class Topology:
                 continue
             path_for_d = self.get_user_path(source, d)
             if path_for_d == None or path_for_d == []:
-                self.logging.warning("You algorithm cannot find a path from %d to %d." % (source, d))
+                self.logging.warning("Your algorithm cannot find a path from %d to %d." % (source, d))
             else:
                 for p in path_for_d:
                     user_path_set.add(p)
