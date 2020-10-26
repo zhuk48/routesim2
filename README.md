@@ -8,7 +8,7 @@ This code is the basis for a programming project for Northwestern's University's
 
 This code is written for Python 3 and it was tested on version 3.5.  Run the following to install the two required packages:
 
-    $ pip install networkx matplotlib
+    $ pip install --user networkx matplotlib
 
 ### Running:
 
