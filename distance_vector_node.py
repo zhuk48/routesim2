@@ -2,13 +2,12 @@ from simulator.node import Node
 
 #Why doesn't Python have structs like C???
 #DV list:
-# [cost, next_hop, timestamp]
+# [cost, next_hop, seq]
 
 class Distance_Vector_Node(Node):
     def __init__(self, id):
         super().__init__(id)
         self.dist = {} # dictionary to hold distances and paths to given node
-        self.links = {} # dictionary containing all linkes connected to given node
 
     # Return a string
     def __str__(self):
@@ -17,9 +16,17 @@ class Distance_Vector_Node(Node):
     # Fill in this function
     def link_has_been_updated(self, neighbor, latency):
         # latency = -1 if delete a link
-        self.recalculate_dist(neighbor, latency)
-        pass
 
+        # recalculating distance:
+        temp_set = frozenset(self.id, neighbor)
+        if temp_set in self.dist.keys():
+            self.dist[temp_set][0] = latency 
+            self.dist[temp_set][1] = neighbor
+            self.dist[temp_set][2] += 1
+        else:
+            self.dist[temp_set][0] = latency 
+            self.dist[temp_set][1] = neighbor
+            self.dist[temp_set][2] = 0
     # Fill in this function
     def process_incoming_routing_message(self, m):
         pass
@@ -28,10 +35,10 @@ class Distance_Vector_Node(Node):
     def get_next_hop(self, destination):
         temp_set = frozenset(self.id, destination)
         if temp_set in self.dist.keys():
-            return self.dist[temp_set]
+            return self.dist[temp_set][1]
         else:
             return -1
-
-    # recalculates distances to all nodes after reciving new information
-    def recalculate_dist(self, updated_link, updated_lat):
+            
+    # recalculate all DVs after a link update or when routing message is recieved
+    def recalculate_dv():
         pass
