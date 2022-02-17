@@ -2,7 +2,7 @@ from simulator.node import Node
 
 #Why doesn't Python have structs like C???
 #DV list:
-# [cost, next_hop, seq]
+# [cost, path , seq]
 
 class Distance_Vector_Node(Node):
     def __init__(self, id):
@@ -16,18 +16,20 @@ class Distance_Vector_Node(Node):
     # Fill in this function
     def link_has_been_updated(self, neighbor, latency):
         # latency = -1 if delete a link
-
-        # recalculating distance:
         temp_set = frozenset(self.id, neighbor)
-        if temp_set in self.dist.keys():
-            self.dist[temp_set][0] = latency 
-            self.dist[temp_set][1] = neighbor
-            self.dist[temp_set][2] += 1
+        if latency == -1:
+            del self.dist[temp_set]
         else:
-            self.dist[temp_set][0] = latency 
-            self.dist[temp_set][1] = neighbor
-            self.dist[temp_set][2] = 0
-    # Fill in this function
+            if temp_set in self.dist.keys():
+                # recalculate DV's
+                for key in self.dist:
+                    pass
+            else:
+                # creating new link
+                self.dist[temp_set][0] = latency 
+                self.dist[temp_set][1] = [self.id, neighbor]
+                self.dist[temp_set][2] = 0
+
     def process_incoming_routing_message(self, m):
         pass
 
@@ -41,4 +43,7 @@ class Distance_Vector_Node(Node):
             
     # recalculate all DVs after a link update or when routing message is recieved
     def recalculate_dv():
+        pass
+
+    def broadcast_change():
         pass
