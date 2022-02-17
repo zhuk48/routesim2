@@ -1,4 +1,5 @@
 from simulator.node import Node
+import copy
 
 #Why doesn't Python have structs like C???
 #DV list:
@@ -15,20 +16,28 @@ class Distance_Vector_Node(Node):
 
     # Fill in this function
     def link_has_been_updated(self, neighbor, latency):
-        # latency = -1 if delete a link
         temp_set = frozenset(self.id, neighbor)
-        if latency == -1:
-            del self.dist[temp_set]
-        else:
-            if temp_set in self.dist.keys():
-                # recalculate DV's
-                for key in self.dist:
-                    pass
+        
+        if temp_set in self.dist.keys(): #link already exists, updating value
+            # latency = -1 if delete a link
+            if latency == -1:
+                del self.dist[temp_set]
             else:
-                # creating new link
-                self.dist[temp_set][0] = latency 
-                self.dist[temp_set][1] = [self.id, neighbor]
-                self.dist[temp_set][2] = 0
+                change = self.dist[temp_set][0] - latency
+                # only update if change
+                if change != 0:
+                    # recalculate DV's
+                    # specfically recalculate DV's for any path that travels through updated node
+                    for key in self.dist:
+                        if latency in self.dist[key][1]: # nodes where the updated link is incl in path
+                            self.dist[key][0] = self.dist[key][0] - change
+            self.broadcast_change()
+                     
+        else: #link DNE, create new one
+            self.dist[temp_set][0] = latency 
+            self.dist[temp_set][1] = [self.id, neighbor]
+            self.dist[temp_set][2] = 0
+            self.broadcast_change()
 
     def process_incoming_routing_message(self, m):
         pass
@@ -40,10 +49,7 @@ class Distance_Vector_Node(Node):
             return self.dist[temp_set][1]
         else:
             return -1
-            
-    # recalculate all DVs after a link update or when routing message is recieved
-    def recalculate_dv():
-        pass
+    
 
     def broadcast_change():
         pass
