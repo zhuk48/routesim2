@@ -1,9 +1,12 @@
 from simulator.node import Node
 import copy
+import json
 
 #Why doesn't Python have structs like C???
-#DV list:
-# [cost, path , seq]
+# self.dist:
+# set(a,b) : {DV}
+# DV list:
+# [cost_ab, path_ab , seq_ab]
 
 class Distance_Vector_Node(Node):
     def __init__(self, id):
@@ -51,5 +54,6 @@ class Distance_Vector_Node(Node):
             return -1
     
 
-    def broadcast_change():
-        pass
+    def broadcast_change(self):
+        m = json.dumps(self.dist)
+        self.send_to_neighbors(m)
