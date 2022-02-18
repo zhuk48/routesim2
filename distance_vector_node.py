@@ -9,10 +9,17 @@ import json
 # DV list:
 # [cost_ab, path_ab , seq]
 
+class dv:
+    def __init__(self):
+        self.cost = 0
+        self.path = []
+        self.seq = 0
+
 class Distance_Vector_Node(Node):
     def __init__(self, id):
         super().__init__(id)
         self.dist = {} # dictionary to hold distances and paths to given node
+        self.dist[self.id] = dv(0, [self.id], 0)
 
     # Return a string
     def __str__(self):
@@ -20,47 +27,52 @@ class Distance_Vector_Node(Node):
 
     # Fill in this function
     def link_has_been_updated(self, neighbor, latency):
-        if neighbor in self.dist.keys(): #link already exists, updating value
+        if neighbor in self.dist: #link already exists, updating value
             # latency = -1 if delete a link
             if latency == -1:
                 del self.dist[neighbor]
             else:
-                change = self.dist[neighbor][0] - latency
+                change = self.dist[neighbor].cost - latency
                 # only update if change
                 if change != 0:
                     # recalculate DV's
                     # specfically recalculate DV's for any path that travels through updated node
                     for key in self.dist:
                         if neighbor in self.dist[key][1]: # nodes where the updated link is incl in path
-                            self.dist[key][0] = self.dist[key][0] - change
-                            self.dist[key][2] += 1
+                            self.dist[key].cost = self.dist[key].cost - change
+                            self.dist[key].seq += 1
             self.broadcast_change()
                      
         else: #link DNE, create new one
-            self.dist[neighbor] = []
-            self.dist[neighbor][0] = latency 
-            self.dist[neighbor][1] = [self.id, neighbor]
-            self.dist[neighbor][2] = 0
+            self.dist[neighbor] = dv(latency, [self.id, neighbor], 0)
             self.broadcast_change()
 
     def process_incoming_routing_message(self, m):
-        n = m.loads(m)[0]
-        new_table = m.loads(m)[1]
+        n, new_table = m.loads(m)
         if not self.dist == new_table:
-            ## NEED TO DO
-            pass
-
-
+            for key in new_table:
+                if key not in self.dist:
+                    # link in incoming message not in current table
+                    # add to current table
+                    self.dist[key] = dv(self.dist[n].cost + new_table[key].cost,
+                                        new_table[key].path.insert(0,self.id),
+                                        new_table[key].seq)
+                else:
+                    # link in current table, need to update
+                    if self.dist[key].cost > self.dist[n].cost + new_table[key].cost:
+                        self.dist[key].cost = self.dist[n].cost + new_table[key].cost
+                        self.dist[key].path = new_table[key].path.insert(0,self.id)
+                        self.dist[key].seq = new_table[key].seq
+            self.broadcast_change()
 
     # Return a neighbor, -1 if no path to destination
     def get_next_hop(self, destination):
-        temp_set = frozenset(self.id, destination)
-        if temp_set in self.dist.keys():
-            return self.dist[temp_set][1]
+        if destination in self.dist:
+            return self.dist[destination].cost
         else:
             return -1
     
 
     def broadcast_change(self):
-        m = json.dumps(self.id, self.dist)
+        m = json.dumps((self.id, self.dist))
         self.send_to_neighbors(m)
