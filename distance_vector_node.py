@@ -10,7 +10,7 @@ import json
 # [cost_ab, path_ab , seq]
 
 class dv:
-    def __init__(self, cost, path, seq):
+    def __init__(self, cost, seq, path=[]):
         self.cost = cost
         self.path = path
         self.seq = seq
@@ -19,7 +19,7 @@ class Distance_Vector_Node(Node):
     def __init__(self, id):
         super().__init__(id)
         self.dist = {} # dictionary to hold distances and paths to given node
-        self.dist[self.id] = dv(0, [self.id], 0)
+        self.dist[self.id] = dv(0, 0, [self.id])
 
     # Return a string
     def __str__(self):
@@ -27,6 +27,9 @@ class Distance_Vector_Node(Node):
 
     # Fill in this function
     def link_has_been_updated(self, neighbor, latency):
+        #print(self.dist)
+        #for key in self.dist:
+            #print(self.dist[key].path)
         if neighbor in self.dist: #link already exists, updating value
             # latency = -1 if delete a link
             if latency == -1:
@@ -35,16 +38,19 @@ class Distance_Vector_Node(Node):
                 change = self.dist[neighbor].cost - latency
                 # only update if change
                 if change != 0:
+                    self.dist[neighbor].cost = latency
+                    self.dist[neighbor].seq += 1
                     # recalculate DV's
                     # specfically recalculate DV's for any path that travels through updated node
                     for key in self.dist:
+                        print("path for node #" + str(self.id) + " for key " + str(key) + ":")
+                        print(self.dist[key].path)
                         if neighbor in self.dist[key].path: # nodes where the updated link is incl in path
                             self.dist[key].cost = self.dist[key].cost - change
-                    self.dist[key].seq += 1
             self.broadcast_change()
                      
         else: #link DNE, create new one
-            self.dist[neighbor] = dv(latency, [self.id, neighbor], 0)
+            self.dist[neighbor] = dv(latency, 0, [self.id, neighbor])
             self.broadcast_change()
 
     def process_incoming_routing_message(self, m):
@@ -52,23 +58,28 @@ class Distance_Vector_Node(Node):
         new_table = json.loads(new_table)
         # converting json back to class
         for key in new_table:
-            new_table[key] = dv(new_table[key]['cost'], new_table[key]['path'], new_table[key]['seq'])
-        print("table below")
-        print(new_table)
+            new_table[key] = dv(new_table[key]['cost'], new_table[key]['seq'], new_table[key]['path'])
+            #print(new_table[key].cost)
+            #print(new_table[key].path)
+            #print(new_table[key].path)
+            #if not new_table[key].path:
+                #print("PATH IS NONE")
+        #print(new_table)
         if not self.dist == new_table:
             for key in new_table:
                 if key not in self.dist:
                     # link in incoming message not in current table
                     # add to current table
-                    self.dist[key] = dv(self.dist[n].cost + new_table[key].cost,
-                                        new_table[key].path.insert(0,self.id),
-                                        new_table[key].seq)
+                    self.dist[key] = copy.deepcopy(new_table[key])
+                    self.dist[key].path.insert(0, self.id)
+                    self.dist[key].cost += self.dist[n].cost 
+                    #print(new_table[key].path)
                 else:
                     # link in current table, need to update
                     if self.dist[key].cost > self.dist[n].cost + new_table[key].cost:
-                        self.dist[key].cost = self.dist[n].cost + new_table[key].cost
-                        self.dist[key].path = new_table[key].path.insert(0,self.id)
-                        self.dist[key].seq = new_table[key].seq
+                        self.dist[key] = copy.deepcopy(new_table[key])
+                        self.dist[key].cost += self.dist[n].cost
+                        self.dist[key].path.insert(0,self.id)
             self.broadcast_change()
 
     # Return a neighbor, -1 if no path to destination
