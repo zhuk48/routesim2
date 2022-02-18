@@ -54,19 +54,28 @@ class Distance_Vector_Node(Node):
             self.broadcast_change()
 
     def process_incoming_routing_message(self, m):
-        n, new_table = json.loads(m)
+        num, new_table = json.loads(m)
+        n = int(num)
+        #print(type(n))
         new_table = json.loads(new_table)
         # converting json back to class
         print("INCOMING TABLE from node" + str(n))
         for key in new_table:
+            print("type(key): " + str(type(key)))
             new_table[key] = dv(new_table[key]['cost'], new_table[key]['seq'], new_table[key]['path'])
-            print(new_table[key].cost)
-            print(new_table[key].path)
+            #print(new_table[key].cost)
+            #print(new_table[key].path)
             #if not new_table[key].path:
                 #print("PATH IS NONE")
         #print(new_table)
+
+        # JSONs suck and this line converts keys in new_table from strings to ints
+        new_table = {int(key):value for key, value in new_table.items()}
+
         print("CURRENT TABLE for node " + str(self.id))
         for key in self.dist:
+            print(type(key))
+            print(key)
             print(self.dist[key].cost)
             print(self.dist[key].path)
 
@@ -93,7 +102,7 @@ class Distance_Vector_Node(Node):
     # Return a neighbor, -1 if no path to destination
     def get_next_hop(self, destination):
         if destination in self.dist:
-            return self.dist[destination].cost
+            return self.dist[destination].path[1]
         else:
             return -1
     
