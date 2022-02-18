@@ -77,9 +77,21 @@ class Distance_Vector_Node(Node):
             print(self.dist[key].cost)
             print(self.dist[key].path)
 
+        # checking for new nodes that curr node is unaware of
+        my_keys = set(self.dist.keys())
+        for n in self.ndist:
+            n_keys = set(self.ndist[n].keys())
+            diff = n_keys.difference(my_keys)
+            if diff:
+                dv_updated = True
+                ldiff = list(diff)
+                for i in ldiff:
+                    self.dist[i] = copy.deepcopy(self.ndist[n][i])
+                    self.dist[i].cost += self.dist[n].cost
+                    self.dist[i].path.insert(0,self.id)
+
         for key in self.dist: # loop through all current entries in DV
             curr_best = self.dist[key].cost
-            
             # checking for updated distances
             for neighbor in self.ndist: # checking all neighbors' DVs
                 if key in self.ndist[neighbor] and key != neighbor: # if this neighbor has a path to the destination
