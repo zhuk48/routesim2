@@ -57,29 +57,37 @@ class Distance_Vector_Node(Node):
         n, new_table = json.loads(m)
         new_table = json.loads(new_table)
         # converting json back to class
+        print("INCOMING TABLE from node" + str(n))
         for key in new_table:
             new_table[key] = dv(new_table[key]['cost'], new_table[key]['seq'], new_table[key]['path'])
-            #print(new_table[key].cost)
-            #print(new_table[key].path)
-            #print(new_table[key].path)
+            print(new_table[key].cost)
+            print(new_table[key].path)
             #if not new_table[key].path:
                 #print("PATH IS NONE")
         #print(new_table)
-        if not self.dist == new_table:
-            for key in new_table:
-                if key not in self.dist:
-                    # link in incoming message not in current table
-                    # add to current table
+        print("CURRENT TABLE for node " + str(self.id))
+        for key in self.dist:
+            print(self.dist[key].cost)
+            print(self.dist[key].path)
+
+        dv_updated = False   
+        for key in new_table:
+            if key not in self.dist:
+                dv_updated = True
+                # link in incoming message not in current table
+                # add to current table
+                self.dist[key] = copy.deepcopy(new_table[key])
+                self.dist[key].path.insert(0, self.id)
+                self.dist[key].cost += self.dist[n].cost 
+                #print(new_table[key].path)
+            else:
+                # link in current table, need to update
+                if self.dist[key].cost > self.dist[n].cost + new_table[key].cost:
+                    dv_updated = True
                     self.dist[key] = copy.deepcopy(new_table[key])
-                    self.dist[key].path.insert(0, self.id)
-                    self.dist[key].cost += self.dist[n].cost 
-                    #print(new_table[key].path)
-                else:
-                    # link in current table, need to update
-                    if self.dist[key].cost > self.dist[n].cost + new_table[key].cost:
-                        self.dist[key] = copy.deepcopy(new_table[key])
-                        self.dist[key].cost += self.dist[n].cost
-                        self.dist[key].path.insert(0,self.id)
+                    self.dist[key].cost += self.dist[n].cost
+                    self.dist[key].path.insert(0,self.id)
+        if dv_updated == True:
             self.broadcast_change()
 
     # Return a neighbor, -1 if no path to destination
