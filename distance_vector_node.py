@@ -10,10 +10,10 @@ import json
 # [cost_ab, path_ab , seq]
 
 class dv:
-    def __init__(self):
-        self.cost = 0
-        self.path = []
-        self.seq = 0
+    def __init__(self, cost, path, seq):
+        self.cost = cost
+        self.path = path
+        self.seq = seq
 
 class Distance_Vector_Node(Node):
     def __init__(self, id):
@@ -38,9 +38,9 @@ class Distance_Vector_Node(Node):
                     # recalculate DV's
                     # specfically recalculate DV's for any path that travels through updated node
                     for key in self.dist:
-                        if neighbor in self.dist[key][1]: # nodes where the updated link is incl in path
+                        if neighbor in self.dist[key].path: # nodes where the updated link is incl in path
                             self.dist[key].cost = self.dist[key].cost - change
-                            self.dist[key].seq += 1
+                    self.dist[key].seq += 1
             self.broadcast_change()
                      
         else: #link DNE, create new one
@@ -48,7 +48,13 @@ class Distance_Vector_Node(Node):
             self.broadcast_change()
 
     def process_incoming_routing_message(self, m):
-        n, new_table = m.loads(m)
+        n, new_table = json.loads(m)
+        new_table = json.loads(new_table)
+        # converting json back to class
+        for key in new_table:
+            new_table[key] = dv(new_table[key]['cost'], new_table[key]['path'], new_table[key]['seq'])
+        print("table below")
+        print(new_table)
         if not self.dist == new_table:
             for key in new_table:
                 if key not in self.dist:
@@ -72,7 +78,10 @@ class Distance_Vector_Node(Node):
         else:
             return -1
     
+    def to_json(self, obj):
+        return json.dumps(obj, default=lambda obj: obj.__dict__)
 
     def broadcast_change(self):
-        m = json.dumps((self.id, self.dist))
+        dict_json = self.to_json(self.dist)
+        m = json.dumps((self.id, dict_json))
         self.send_to_neighbors(m)
