@@ -79,7 +79,7 @@ class Distance_Vector_Node(Node):
 
         for key in self.dist: # loop through all current entries in DV
             curr_best = self.dist[key].cost
-
+            
             # checking for updated distances
             for neighbor in self.ndist: # checking all neighbors' DVs
                 if key in self.ndist[neighbor] and key != neighbor: # if this neighbor has a path to the destination
@@ -89,6 +89,9 @@ class Distance_Vector_Node(Node):
                         self.dist[key] = copy.deepcopy(self.ndist[neighbor][key])
                         self.dist[key].cost += self.dist[neighbor].cost
                         self.dist[key].path.insert(0,self.id)
+                # deleted node
+                #if key not in self.ndist[neighbor] and neighbor in self.dist[key].path:
+                    #del self.dist[key]
         
 
         print("NEW dv at node " + str(self.id))
