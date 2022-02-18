@@ -35,38 +35,34 @@ class Distance_Vector_Node(Node):
             if latency == -1:
                 del self.dist[neighbor]
             else:
-                change = self.dist[neighbor].cost - latency
-                # only update if change
-                if change != 0:
+                if self.dist[neighbor].cost > latency:
+                    #self.dist[neighbor].cost = latency
+                    #self.dist[neighbor].path = [self.id, neighbor]
+                    #self.dist[neighbor].seq += 1
+                    # RECALCULATE DV! HOW???
+                    self.broadcast_change(0)
+                elif latency > self.dist[neighbor].cost:
                     self.dist[neighbor].cost = latency
+                    self.dist[neighbor].path = []
                     self.dist[neighbor].seq += 1
-                    # recalculate DV's
-                    # specfically recalculate DV's for any path that travels through updated node
-                    for key in self.dist:
-                        print("path for node #" + str(self.id) + " for key " + str(key) + ":")
-                        print(self.dist[key].path)
-                        if neighbor in self.dist[key].path: # nodes where the updated link is incl in path
-                            self.dist[key].cost = self.dist[key].cost - change
-            self.broadcast_change()
+                    self.broadcast_change(0)
                      
         else: #link DNE, create new one
             self.dist[neighbor] = dv(latency, 0, [self.id, neighbor])
-            self.broadcast_change()
+            self.broadcast_change(0)
 
     def process_incoming_routing_message(self, m):
         num, new_table = json.loads(m)
         n = int(num)
-        #print(type(n))
         new_table = json.loads(new_table)
         # converting json back to class
         print("INCOMING TABLE from node" + str(n))
         for key in new_table:
-            print("type(key): " + str(type(key)))
             new_table[key] = dv(new_table[key]['cost'], new_table[key]['seq'], new_table[key]['path'])
-            #print(new_table[key].cost)
-            #print(new_table[key].path)
-            #if not new_table[key].path:
-                #print("PATH IS NONE")
+            print(key)
+            print(new_table[key].cost)
+            print(new_table[key].path)
+            print(new_table[key].seq)
         #print(new_table)
 
         # JSONs suck and this line converts keys in new_table from strings to ints
@@ -74,10 +70,10 @@ class Distance_Vector_Node(Node):
 
         print("CURRENT TABLE for node " + str(self.id))
         for key in self.dist:
-            print(type(key))
             print(key)
             print(self.dist[key].cost)
             print(self.dist[key].path)
+            print(self.dist[key].seq)
 
         dv_updated = False   
         for key in new_table:
@@ -90,14 +86,26 @@ class Distance_Vector_Node(Node):
                 self.dist[key].cost += self.dist[n].cost 
                 #print(new_table[key].path)
             else:
+                if (new_table[key].seq > self.dist[key].seq) and key != n:
+                    dv_updated = True
+                    self.dist[key] = copy.deepcopy(new_table[key])
+                    self.dist[key].cost += self.dist[n].cost
+                    self.dist[key].path.insert(0,self.id)
                 # link in current table, need to update
                 if self.dist[key].cost > self.dist[n].cost + new_table[key].cost:
                     dv_updated = True
                     self.dist[key] = copy.deepcopy(new_table[key])
                     self.dist[key].cost += self.dist[n].cost
                     self.dist[key].path.insert(0,self.id)
+
+        print("NEW TABLE for node " + str(self.id))
+        for key in self.dist:
+            print(key)
+            print(self.dist[key].cost)
+            print(self.dist[key].path)
+
         if dv_updated == True:
-            self.broadcast_change()
+            self.broadcast_change(0)
 
     # Return a neighbor, -1 if no path to destination
     def get_next_hop(self, destination):
@@ -109,7 +117,10 @@ class Distance_Vector_Node(Node):
     def to_json(self, obj):
         return json.dumps(obj, default=lambda obj: obj.__dict__)
 
-    def broadcast_change(self):
+    def broadcast_change(self, n):
         dict_json = self.to_json(self.dist)
         m = json.dumps((self.id, dict_json))
-        self.send_to_neighbors(m)
+        if n == 0:
+            self.send_to_neighbors(m)
+        else:
+            self.send_to_neighbor(n, m)
