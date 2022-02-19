@@ -98,8 +98,7 @@ class Link_State_Node(Node):
                 #a new edge has been created so u need to make it up to date by giving it information
 
         distances, prev = self.graph.dijkstra(self.id)
-        # print()
-        print(self.id, self.graph.graph)
+        # print(self.id, self.graph.graph)
         self.path = prev 
         msg = {
             'my_id': self.id,
@@ -120,7 +119,6 @@ class Link_State_Node(Node):
         neighbor_id = msg['neighbor_id']
         cost = msg['cost']
         seq_n = msg['seq_n']
-        print(seq_n)
         s = frozenset((neighbor_id, id_of_msg))
         changed = False
         if s in self.seq_n: #seq_n originally just an empty dictionary so gotta check if its a first packet
@@ -131,15 +129,17 @@ class Link_State_Node(Node):
                 else:
                     self.graph.update_edge(id_of_msg, neighbor_id, cost)
                     changed = True
+            else:
+                return #gets an infinite loop highkey if i dont do this 
         else:
             if cost >= 0:
                 self.graph.add_edge(id_of_msg, neighbor_id, cost)
                 changed = True
-        if changed == True:
-            self.seq_n[s] = seq_n
-            dist, prev = self.graph.dijkstra(self.id)
-            self.path = prev
-            self.send_to_neighbors(json.dumps(msg))
+        # if changed == True:
+        self.seq_n[s] = seq_n
+        dist, prev = self.graph.dijkstra(self.id)
+        self.path = prev
+        self.send_to_neighbors(json.dumps(msg))
         
 
     # Return a neighbor, -1 if no path to destination
