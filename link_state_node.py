@@ -16,11 +16,14 @@ class Graph:
             self.graph[n2].append([n1, latency])
 
     def find_neighbor(self, n1, n2): #get index of neighbor in list of neighbors
-        neighbor = self.graph[n1]
-        for i in range(len(neighbor)):
-            if neighbor[i][0] == n2:
-                return i
-        return None
+        if n1 in self.graph:
+            neighbor = self.graph[n1]
+            for i in range(len(neighbor)):
+                if neighbor[i][0] == n2:
+                    return i
+            return None
+        else:
+            return None
 
     def remove_edge(self, n1, n2):
         index1 = self.find_neighbor(n1, n2)
@@ -72,7 +75,7 @@ class Link_State_Node(Node):
         self.path = {}
     # Return a string
     def __str__(self):
-        return "Rewrite this function to define your node dump printout"
+        return f"<Node {self.id}, Reachable Nodes and next hops: {self.path}>"
 
     # Fill in this function
     def link_has_been_updated(self, neighbor, latency):
@@ -82,19 +85,21 @@ class Link_State_Node(Node):
         self.seq_n[s] += 1
         # latency = -1 if delete a link
         #only change graph if latency is diffrent for that specefic edge
-        neighbor_index = self.graph.find_neighbor(self.id, neighbor)
-        if self.graph[self.id][neighbor_index][1] == latency:
-            return
-        if neighbor in self.graph:
-            if latency == -1:
-                self.graph.remove_edge(self.id, neighbor)
-            else:
-                self.graph.update_edge(self.id, neighbor, latency)
+        # neighbor_index = self.graph.find_neighbor(self.id, neighbor)
+        # if self.graph[self.id][neighbor_index][1] == latency: #dont even send msg so just return
+        #     return
+        if latency == -1:
+            self.graph.remove_edge(self.id, neighbor)
         else:
-            self.graph.add_edge(self.id, neighbor, latency)
-            #a new edge has been created so u need to make it up to date by giving it information
+            if self.graph.find_neighbor(self.id, neighbor) is not None: 
+                self.graph.update_edge(self.id, neighbor, latency)
+            else:
+                self.graph.add_edge(self.id, neighbor, latency)
+                #a new edge has been created so u need to make it up to date by giving it information
 
         distances, prev = self.graph.dijkstra(self.id)
+        # print()
+        print(self.id, self.graph.graph)
         self.path = prev 
         msg = {
             'my_id': self.id,
@@ -113,28 +118,29 @@ class Link_State_Node(Node):
         msg = {key: int(value) for key, value in msg.items()} #i want my values to be ints and not strings
         id_of_msg = msg['my_id']
         neighbor_id = msg['neighbor_id']
-        cost = msg['latency']
+        cost = msg['cost']
         seq_n = msg['seq_n']
-        s = frozenset((self.id, id_of_msg))
-        if self.seq_n[s] < seq_n: #check if msg is old or not
-            #check for new edge 
-            index = self.graph.find_neighbor(id_of_msg, neighbor_id)
-            if index == None:
-                self.graph.add_edge(id_of_msg, neighbor_id, cost)
-            else:
+        print(seq_n)
+        s = frozenset((neighbor_id, id_of_msg))
+        changed = False
+        if s in self.seq_n: #seq_n originally just an empty dictionary so gotta check if its a first packet
+            if self.seq_n[s] < seq_n:
                 if cost == -1:
                     self.graph.remove_edge(id_of_msg, neighbor_id)
+                    changed = True
                 else:
                     self.graph.update_edge(id_of_msg, neighbor_id, cost)
+                    changed = True
+        else:
+            if cost >= 0:
+                self.graph.add_edge(id_of_msg, neighbor_id, cost)
+                changed = True
+        if changed == True:
+            self.seq_n[s] = seq_n
             dist, prev = self.graph.dijkstra(self.id)
             self.path = prev
-            #update seq_n
-            self.seq_n[s] = seq_n
             self.send_to_neighbors(json.dumps(msg))
-        else:
-            pass
-            #do nothing
-            #process the message and update graphs 
+        
 
     # Return a neighbor, -1 if no path to destination
     def get_next_hop(self, destination):
