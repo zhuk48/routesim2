@@ -92,12 +92,12 @@ class Distance_Vector_Node(Node):
                     self.dist[nkey].cost += self.direct_costs[n]
                     self.dist[nkey].path.insert(0,self.id)
                 else: # existing node, update value
-                    if self.id not in self.ndist[n][nkey].path: #avoid loops
-                        if self.ndist[n][nkey].seq > self.dist[nkey].seq:
+                    if self.ndist[n][nkey].seq > self.dist[nkey].seq:
                             self.dist[nkey] = copy.deepcopy(self.ndist[n][nkey])
-                            self.dist[nkey].cost += self.direct_costs[n]
-                            self.dist[nkey].path.insert(0,self.id)
-                        elif self.dist[nkey].cost > self.direct_costs[n] + self.ndist[n][nkey].cost:
+                    elif self.id not in self.ndist[n][nkey].path: #avoid loops
+                            #self.dist[nkey].cost += self.direct_costs[n]
+                            #self.dist[nkey].path.insert(0,self.id)
+                        if self.dist[nkey].cost > self.direct_costs[n] + self.ndist[n][nkey].cost:
                             dv_updated = True
                             self.dist[nkey] = copy.deepcopy(self.ndist[n][nkey])
                             self.dist[nkey].cost += self.direct_costs[n]
