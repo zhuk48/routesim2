@@ -4,12 +4,7 @@ import copy
 import json
 import math
 
-#Why doesn't Python have structs like C???
-# self.dist:
-# b : {DV}
-# DV list:
-# [cost_ab, path_ab , seq]
-
+## class to hold information about distance vectors
 class dv:
     def __init__(self, cost, seq, path=[]):
         self.cost = cost
@@ -19,46 +14,40 @@ class dv:
 class Distance_Vector_Node(Node):
     def __init__(self, id):
         super().__init__(id)
-        self.dist = {} # dictionary to hold distances and paths to given node
-        self.dist[self.id] = dv(0, 0, [self.id])
-        self.ndist = {} # dictionary to hold DVs of neighbors
+        self.dist = {} # dictionary that takes correspoinding destinations and returns the DV class for that destination node
+        self.dist[self.id] = dv(0, 0, [self.id]) # initializing "self" DV
+        self.ndist = {} # dictionary that takes a neighboring node and returns its dictionary of DVs
+        self.direct_costs = {} # dictionary that holds node's neighbors and direct path costs to those neighbors (not neccisarily the fastest, but the one hop cost)
+        # ^^ was told this would be helpful in OH
 
     # Return a string
     def __str__(self):
         o = "Node: " + str(self.id) + "DV: " + str(self.dv) 
         return o
 
-    # Fill in this function
     def link_has_been_updated(self, neighbor, latency):
         if neighbor in self.dist: #link already exists, updating value
             # latency = -1 if delete a link
             if latency == -1:
-                print("NODE DELETED")
-                #del self.ndist[neighbor]
-                #nodes_to_del = []
-                #for m in self.dist:
-                #    if neighbor in self.dist[m].path:
-                #        nodes_to_del.append(m)
-                #for j in nodes_to_del:
-                #    del self.dist[j]
-                self.dist[neighbor].cost = math.inf
-                self.dist[neighbor].path = []
-                self.dist[neighbor].seq += 1
-                for m in self.dist:
-                    if neighbor in self.dist[m].path:
-                        if m not in self.ndist.keys():
-                            self.dist[m].cost = math.inf
-                            self.dist[m].path = []
-                            self.dist[m].seq += 1
-
+                self.direct_costs[neighbor] = math.inf
+                #self.dist[neighbor].cost = math.inf
+                #self.dist[neighbor].seq += 1
+                #self.dist[neighbor].path = [self.id]
+                for key in self.dist:
+                    if neighbor in self.dist[key].path:
+                        self.dist[key].cost = math.inf
+                        self.dist[key].seq += 1
+                        self.dist[key].path.clear()
             else:
+                self.direct_costs[neighbor] = latency
                 self.dist[neighbor].cost = latency
+                self.dist[neighbor].path = [self.id, neighbor]
                 self.dist[neighbor].seq += 1
-                if latency <= self.dist[neighbor].cost: # current path is quicker than previous
-                    self.dist[neighbor].path = [self.id, neighbor]          
         else: #link DNE, create new one
+            self.direct_costs[neighbor] = latency  
             self.dist[neighbor] = dv(latency, 0, [self.id, neighbor])
         
+        print("updated node at " + str(self.id))
         self.recalculate_dist()
         self.broadcast_change(0)
 
@@ -92,53 +81,27 @@ class Distance_Vector_Node(Node):
 
         #print("old dv at node " + str(self.id))
         #for key in self.dist:
-        #    print(key)
-        #    print(self.dist[key].cost)
-        #    print(self.dist[key].path)
+        #    print(key, self.dist[key].cost, self.dist[key].path)
 
-        # checking for deleted nodes
-        #del_nodes = []
-        #my_keys = set(self.dist.keys())
-        #for m in self.dist:
-        #    for n in self.ndist:
-        #        n_keys = set(self.ndist[n].keys())
-        #        diff = my_keys.difference(n_keys)
-        #        ldiff = list(diff)
-        #        for i in ldiff:
-        #            if n in self.dist[m].path and i  in self.dist[m].path: ##(ldiff.index(i) ):
-        #                del_nodes.append(m)
-        #for k in del_nodes:
-        #    dv_updated = True
-        #    if k in self.dist:
-        #        del self.dist[k]
-
-        # checking for new nodes that curr node is unaware of
-        my_keys = set(self.dist.keys())
+        # checking for faster paths via neighbors
         for n in self.ndist:
-            n_keys = set(self.ndist[n].keys())
-            diff = n_keys.difference(my_keys)
-            if diff:
-                dv_updated = True
-                ldiff = list(diff)
-                for i in ldiff:
-                    if self.id not in self.ndist[n][i].path:
-                        self.dist[i] = copy.deepcopy(self.ndist[n][i])
-                        self.dist[i].cost += self.dist[n].cost
-                        self.dist[i].path.insert(0,self.id)
-
-
-        for key in self.dist: # loop through all current entries in DV
-            curr_best = self.dist[key].cost
-            # checking for updated distances
-            for neighbor in self.ndist: # checking all neighbors' DVs
-                if key in self.ndist[neighbor] and key != neighbor: # if this neighbor has a path to the destination
-                    # we also don't want to copy the "identification entry in DV" (cost of n to n is 0)
-                    if curr_best > self.ndist[neighbor][key].cost + self.dist[neighbor].cost:
-                        if (self.id not in self.ndist[neighbor][key].path): # avoid loops
+            for nkey in self.ndist[n]:
+                if nkey not in self.dist: # found new node
+                    dv_updated = True
+                    self.dist[nkey] = copy.deepcopy(self.ndist[n][nkey])
+                    self.dist[nkey].cost += self.direct_costs[n]
+                    self.dist[nkey].path.insert(0,self.id)
+                else: # existing node, update value
+                    if self.id not in self.ndist[n][nkey].path: #avoid loops
+                        if self.ndist[n][nkey].seq > self.dist[nkey].seq:
+                            self.dist[nkey] = copy.deepcopy(self.ndist[n][nkey])
+                            self.dist[nkey].cost += self.direct_costs[n]
+                            self.dist[nkey].path.insert(0,self.id)
+                        elif self.dist[nkey].cost > self.direct_costs[n] + self.ndist[n][nkey].cost:
                             dv_updated = True
-                            self.dist[key] = copy.deepcopy(self.ndist[neighbor][key])
-                            self.dist[key].cost += self.dist[neighbor].cost
-                            self.dist[key].path.insert(0,self.id)
+                            self.dist[nkey] = copy.deepcopy(self.ndist[n][nkey])
+                            self.dist[nkey].cost += self.direct_costs[n]
+                            self.dist[nkey].path.insert(0,self.id)
 
         print("NEW dv at node " + str(self.id))
         for key in self.dist:
