@@ -19,6 +19,7 @@ class Distance_Vector_Node(Node):
         self.ndist = {} # dictionary that takes a neighboring node and returns its dictionary of DVs
         self.direct_costs = {} # dictionary that holds node's neighbors and direct path costs to those neighbors (not neccisarily the fastest, but the one hop cost)
         # ^^ was told this would be helpful in OH
+        self.nseq = {}
 
     # Return a string
     def __str__(self):
@@ -29,15 +30,14 @@ class Distance_Vector_Node(Node):
         if neighbor in self.dist: #link already exists, updating value
             # latency = -1 if delete a link
             if latency == -1:
-                self.direct_costs[neighbor] = math.inf
-                #self.dist[neighbor].cost = math.inf
-                #self.dist[neighbor].seq += 1
-                #self.dist[neighbor].path = [self.id]
+                del self.direct_costs[neighbor]
+                del self.ndist[neighbor]
+
                 for key in self.dist:
                     if neighbor in self.dist[key].path:
                         self.dist[key].cost = math.inf
                         self.dist[key].seq += 1
-                        self.dist[key].path.clear()
+                        #self.dist[key].path.clear()
             else:
                 self.direct_costs[neighbor] = latency
                 self.dist[neighbor].cost = latency
@@ -47,7 +47,7 @@ class Distance_Vector_Node(Node):
             self.direct_costs[neighbor] = latency  
             self.dist[neighbor] = dv(latency, 0, [self.id, neighbor])
         
-        print("updated node at " + str(self.id))
+        #print("updated node at " + str(self.id))
         self.recalculate_dist()
         self.broadcast_change(0)
 
@@ -65,7 +65,7 @@ class Distance_Vector_Node(Node):
         # updating incoming neighbor DV in self.ndist
         self.ndist[n] = new_table
 
-        print("self.id = " + str(self.id) + "incoming message from:" + str(n))
+        #print("self.id = " + str(self.id) + "incoming message from:" + str(n))
         if self.recalculate_dist() == True:
             self.broadcast_change(0)
 
@@ -92,20 +92,25 @@ class Distance_Vector_Node(Node):
                     self.dist[nkey].cost += self.direct_costs[n]
                     self.dist[nkey].path.insert(0,self.id)
                 else: # existing node, update value
-                    if self.ndist[n][nkey].seq > self.dist[nkey].seq:
-                            self.dist[nkey] = copy.deepcopy(self.ndist[n][nkey])
+                    if nkey in self.dist[n].path and self.ndist[n][nkey].seq > self.dist[nkey].seq:
+                        self.dist[nkey] = copy.deepcopy(self.ndist[n][nkey])
+                        self.dist[nkey].cost += self.direct_costs[n]
+                        self.dist[nkey].path.insert(0,self.id)
                     elif self.id not in self.ndist[n][nkey].path: #avoid loops
-                            #self.dist[nkey].cost += self.direct_costs[n]
-                            #self.dist[nkey].path.insert(0,self.id)
                         if self.dist[nkey].cost > self.direct_costs[n] + self.ndist[n][nkey].cost:
                             dv_updated = True
+                            old_seq = self.dist[nkey].seq 
                             self.dist[nkey] = copy.deepcopy(self.ndist[n][nkey])
                             self.dist[nkey].cost += self.direct_costs[n]
                             self.dist[nkey].path.insert(0,self.id)
+                            #if old_seq > self.ndist[n][nkey].seq:
+                            #    dv_updated = True
+                            #    self.dist[nkey].seq = old_seq
+
 
         print("NEW dv at node " + str(self.id))
         for key in self.dist:
-            print(key, self.dist[key].cost, self.dist[key].path)
+            print(key, self.dist[key].cost, self.dist[key].path, self.dist[key].seq)
 
         return dv_updated
         
@@ -122,6 +127,3 @@ class Distance_Vector_Node(Node):
             self.send_to_neighbors(m)
         else:
             self.send_to_neighbor(n, m)
-
-# Edge cases:
-# avoid loops see if path includes own node
