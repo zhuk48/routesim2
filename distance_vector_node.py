@@ -30,29 +30,30 @@ class Distance_Vector_Node(Node):
         if neighbor in self.dist: #link already exists, updating value
             # latency = -1 if delete a link
             if latency == -1:
-                del self.direct_costs[neighbor]
+                self.direct_costs[neighbor] = math.inf
                 del self.ndist[neighbor]
 
                 for key in self.dist:
                     if neighbor in self.dist[key].path:
                         self.dist[key].cost = math.inf
                         self.dist[key].seq += 1
-                        #self.dist[key].path.clear()
+                        self.dist[key].path.clear()
             else:
                 self.direct_costs[neighbor] = latency
                 self.dist[neighbor].cost = latency
                 self.dist[neighbor].path = [self.id, neighbor]
                 self.dist[neighbor].seq += 1
+                
         else: #link DNE, create new one
             self.direct_costs[neighbor] = latency  
             self.dist[neighbor] = dv(latency, 0, [self.id, neighbor])
+            self.recalculate_dist()
         
         #print("updated node at " + str(self.id))
-        self.recalculate_dist()
         self.broadcast_change(0)
 
     def process_incoming_routing_message(self, m):
-        n, new_table = json.loads(m)
+        n, t, new_table = json.loads(m)
         new_table = json.loads(new_table)
         # converting json back to class
         for key in new_table:
@@ -62,10 +63,14 @@ class Distance_Vector_Node(Node):
         # this line was taken from stack overflow
         new_table = {int(key):value for key, value in new_table.items()}
         
+        if n in self.ndist and self.nseq[n] > t:
+            return
         # updating incoming neighbor DV in self.ndist
         self.ndist[n] = new_table
+        self.nseq[n] = t
 
         #print("self.id = " + str(self.id) + "incoming message from:" + str(n))
+        print("incoming message from node " + str(n))
         if self.recalculate_dist() == True:
             self.broadcast_change(0)
 
@@ -83,34 +88,49 @@ class Distance_Vector_Node(Node):
         #for key in self.dist:
         #    print(key, self.dist[key].cost, self.dist[key].path)
 
+        # force recalulate all current paths
+        #for dest in self.dist:
+        #    if len(self.dist[dest].path) > 2:
+        #        next_hop = self.dist[dest].path[1]
+        #        updated_cost = self.direct_costs[next_hop] + self.ndist[next_hop][dest].cost
+        #        self.dist[dest].cost = updated_cost
+
         # checking for faster paths via neighbors
         for n in self.ndist:
-            for nkey in self.ndist[n]:
-                if nkey not in self.dist: # found new node
+            for dnode in self.ndist[n]:
+                #print("ndist:" + str(n) + " dest:" + str(nkey) + ":")
+                #print(self.ndist[n][nkey].cost, self.ndist[n][nkey].path, self.ndist[n][nkey].seq)
+
+                if dnode not in self.dist: # found new node
                     dv_updated = True
-                    self.dist[nkey] = copy.deepcopy(self.ndist[n][nkey])
-                    self.dist[nkey].cost += self.direct_costs[n]
-                    self.dist[nkey].path.insert(0,self.id)
+                    self.dist[dnode] = copy.deepcopy(self.ndist[n][dnode])
+                    self.dist[dnode].cost += self.direct_costs[n]
+                    self.dist[dnode].path.insert(0,self.id)
                 else: # existing node, update value
-                    if nkey in self.dist[n].path and self.ndist[n][nkey].seq > self.dist[nkey].seq:
-                        self.dist[nkey] = copy.deepcopy(self.ndist[n][nkey])
-                        self.dist[nkey].cost += self.direct_costs[n]
-                        self.dist[nkey].path.insert(0,self.id)
-                    elif self.id not in self.ndist[n][nkey].path: #avoid loops
-                        if self.dist[nkey].cost > self.direct_costs[n] + self.ndist[n][nkey].cost:
+                    curr_cost = self.dist[dnode].cost
+                    curr_path = self.dist[dnode].path
+                    curr_seq = self.dist[dnode].seq
+                    in_cost = self.ndist[n][dnode].cost
+                    in_seq = self.ndist[n][dnode].seq
+                    in_path = self.ndist[n][dnode].path
+
+                    if in_seq > curr_seq:
+                        self.dist[dnode] = copy.deepcopy(self.ndist[n][dnode])
+                        self.dist[dnode].cost += self.direct_costs[n]
+                        self.dist[dnode].path.insert(0,self.id)
+
+                    if self.id not in in_path: #avoid loops
+                        if curr_cost > self.direct_costs[n] + in_cost:
                             dv_updated = True
-                            old_seq = self.dist[nkey].seq 
-                            self.dist[nkey] = copy.deepcopy(self.ndist[n][nkey])
-                            self.dist[nkey].cost += self.direct_costs[n]
-                            self.dist[nkey].path.insert(0,self.id)
-                            #if old_seq > self.ndist[n][nkey].seq:
-                            #    dv_updated = True
-                            #    self.dist[nkey].seq = old_seq
+                            self.dist[dnode] = copy.deepcopy(self.ndist[n][dnode])
+                            self.dist[dnode].cost += self.direct_costs[n]
+                            self.dist[dnode].path.insert(0,self.id)
 
-
-        print("NEW dv at node " + str(self.id))
+        print("\n")
+        print("NEW DV at: " + str(self.id))
         for key in self.dist:
             print(key, self.dist[key].cost, self.dist[key].path, self.dist[key].seq)
+        print("\n")
 
         return dv_updated
         
@@ -122,7 +142,7 @@ class Distance_Vector_Node(Node):
     # when n=0, broadcast to all neighbors, else n is specific neighbor to broadcast to
     def broadcast_change(self, n):
         dict_json = self.to_json(self.dist)
-        m = json.dumps((self.id, dict_json))
+        m = json.dumps((self.id, self.get_time(), dict_json))
         if n == 0:
             self.send_to_neighbors(m)
         else:
