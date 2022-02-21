@@ -74,7 +74,7 @@ class Link_State_Node(Node):
         self.msgs = {}
     # Return a string
     def __str__(self):
-        return f"<Node {self.id}, Reachable Nodes and next hops: {self.path}>"
+        return "Rewrite this function to define your node dump printout"
 
     # Fill in this function
     def link_has_been_updated(self, neighbor, latency):
