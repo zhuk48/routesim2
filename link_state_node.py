@@ -16,14 +16,14 @@ class Graph:
             self.graph[n2].append([n1, latency])
 
     def find_neighbor(self, n1, n2): #get index of neighbor in list of neighbors
-        if n1 in self.graph:
-            neighbor = self.graph[n1]
-            for i in range(len(neighbor)):
-                if neighbor[i][0] == n2:
-                    return i
-            return None
-        else:
-            return None
+        if n1 not in self.graph: 
+            return None 
+
+        neighbor = self.graph[n1]
+        for i in range(len(neighbor)):
+            if neighbor[i][0] == n2:
+                return i
+        return None
 
     def remove_edge(self, n1, n2):
         index1 = self.find_neighbor(n1, n2)
@@ -38,8 +38,6 @@ class Graph:
             index2 = self.find_neighbor(n2, n1)
             self.graph[n1][index1][1] = latency
             self.graph[n2][index2][1] = latency
-    def get_neighbors(self, n1):
-        return self.graph[n1]
 
     def dijkstra(self, start):
         vis = {}
@@ -73,6 +71,7 @@ class Link_State_Node(Node):
         self.graph = Graph()
         self.seq_n = {}
         self.path = {}
+        self.msgs = {}
     # Return a string
     def __str__(self):
         return f"<Node {self.id}, Reachable Nodes and next hops: {self.path}>"
@@ -90,24 +89,25 @@ class Link_State_Node(Node):
         #     return
         if latency == -1:
             self.graph.remove_edge(self.id, neighbor)
-        else:
+        elif latency >= 0:
             if self.graph.find_neighbor(self.id, neighbor) is not None: 
                 self.graph.update_edge(self.id, neighbor, latency)
             else:
                 self.graph.add_edge(self.id, neighbor, latency)
                 #a new edge has been created so u need to make it up to date by giving it information
-
+                for keys in self.msgs:
+                    self.send_to_neighbor(neighbor,  json.dumps(self.msgs[keys]))
         distances, prev = self.graph.dijkstra(self.id)
-        # print(self.id, self.graph.graph)
         self.path = prev 
+        #create message include 2 node ids and the cost and the sequence number 
         msg = {
             'my_id': self.id,
             'neighbor_id': neighbor,
             'cost': latency,
             'seq_n': self.seq_n[s]
         }
+        self.msgs[s] = msg
         self.send_to_neighbors(json.dumps(msg))
-        #create message include 2 node ids and the cost and the sequence number 
         #share graph with neighbor
 
 
@@ -129,17 +129,18 @@ class Link_State_Node(Node):
                 else:
                     self.graph.update_edge(id_of_msg, neighbor_id, cost)
                     changed = True
-            else:
+            elif self.seq_n[s] > seq_n:
                 return #gets an infinite loop highkey if i dont do this 
         else:
             if cost >= 0:
                 self.graph.add_edge(id_of_msg, neighbor_id, cost)
                 changed = True
-        # if changed == True:
-        self.seq_n[s] = seq_n
-        dist, prev = self.graph.dijkstra(self.id)
-        self.path = prev
-        self.send_to_neighbors(json.dumps(msg))
+        if changed == True:
+            self.seq_n[s] = seq_n
+            self.msgs[s] = msg
+            dist, prev = self.graph.dijkstra(self.id)
+            self.path = prev
+            self.send_to_neighbors(json.dumps(msg))
         
 
     # Return a neighbor, -1 if no path to destination
