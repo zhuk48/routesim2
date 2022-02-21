@@ -84,27 +84,30 @@ class Distance_Vector_Node(Node):
 
     def recalculate_dist(self):
         new_dv = {}
-        # checking for faster paths via neighbors
+        # checking for faster paths via neighbors's neighbors
         for n in self.ndist:
             for dnode in self.ndist[n]:
-                cost = self.ndist[n][dnode].cost
-                path = self.ndist[n][dnode].path
-                if self.id in path:
-                    continue
-                curr_node = new_dv.get(dnode)
-                if curr_node and (cost + self.direct_costs[n]) >= curr_node.cost:
-                    # existing node in DV is optimal
-                    pass
-                else:
-                    # new node or a new shorter path found
-                    new_p = copy.deepcopy(path)
-                    new_p.insert(0, n)
-                    new_dv[dnode] = dv(cost + self.direct_costs[n], new_p)
+                if self.id not in self.ndist[n][dnode].path: # avoids loops and counting to infinity
+                    if dnode not in new_dv: # new node
+                        new_dv[dnode] = copy.deepcopy(self.ndist[n][dnode])
+                        new_dv[dnode].path.insert(0, n)
+                        new_dv[dnode].cost += self.direct_costs[n]
+                    else: # new node found
+                        if new_dv[dnode].cost > self.ndist[n][dnode].cost + self.direct_costs[n]:
+                            new_dv[dnode] = copy.deepcopy(self.ndist[n][dnode])
+                            new_dv[dnode].path.insert(0, n)
+                            new_dv[dnode].cost += self.direct_costs[n]
+                        
 
-        for nid in self.direct_costs:
-            cost = self.direct_costs[nid]
-            if not nid in new_dv or new_dv[nid].cost > cost:
-                new_dv[nid] = dv(cost, [nid])
+        # checking for faster paths via direct connections
+        for neighbor in self.direct_costs:
+            if neighbor not in new_dv:
+                new_dv[neighbor] = dv(self.direct_costs[neighbor], [neighbor])
+            else:
+                if new_dv[neighbor].cost > self.direct_costs[neighbor]:
+                    new_dv[neighbor].cost = self.direct_costs[neighbor]
+                    new_dv[neighbor].path = [neighbor]
+                    
 
         # only broadcast if self.dist was updated
         # equality in python is more complicated than what meets the eye, man this bug took like 3 hours to figure out
